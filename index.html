@@ -235,6 +235,9 @@
       0 2px 5px rgba(0,0,0,.14),
       inset 0 0 0 1px rgba(0,0,0,.06);
     will-change: top;
+    /* 关键：把每张牌做成独立的层叠上下文。
+       否则牌内部伪元素的 z-index 会逃到整张牌桌上，把背面牌的暗边画到上面的正面牌脸上 */
+    isolation: isolate;
   }
   /* 深红古典回纹牌背 */
   .card.down {
@@ -249,7 +252,7 @@
   .card.down::before {
     content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
     background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.35));
-    z-index: 3; pointer-events: none;
+    pointer-events: none;
   }
   /* 牌背外框：白细线 → 深红 → 白细线 */
   .card.down::after {
