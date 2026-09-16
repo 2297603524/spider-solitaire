@@ -32,24 +32,21 @@
     display: flex;
     flex-direction: column;
     font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
-    background: radial-gradient(118% 82% at 50% 4%, #2d7152 0%, #1c523c 40%, #0d2c1e 80%, #061710 100%);
+    /* 经典纸牌绿 + 细密菱形织纹 */
+    background-color: #0e9743;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(0,0,0,.07) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,.07) 0 1px, transparent 1px 5px);
     color: #e9f4ee;
     overflow: hidden;
     -webkit-user-select: none; user-select: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: none;
   }
-  /* 桌面：上方来光 + 四周暗角 + 极轻的织物颗粒，避免大块纯色显得廉价 */
+  /* 轻微暗角，把视线收在牌桌中间 */
   body::before {
     content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-    background:
-      radial-gradient(58% 34% at 50% -8%, rgba(150,240,200,.10), transparent 72%),
-      radial-gradient(140% 112% at 50% -6%, transparent 62%, rgba(0,0,0,.32) 100%);
-  }
-  body::after {
-    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-    opacity: .05; mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background: radial-gradient(132% 106% at 50% -6%, transparent 66%, rgba(0,0,0,.22) 100%);
   }
   :root {
     --cw: 84px;
@@ -201,6 +198,14 @@
     min-height: var(--ch);
     transition: background .15s, box-shadow .15s;
   }
+  /* 空列占位框，让空出来的位置仍然可见 */
+  .col:empty::before {
+    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: var(--ch);
+    border-radius: calc(var(--cw) * .08);
+    border: 1.5px solid rgba(255,255,255,.22);
+    background: rgba(0,0,0,.10);
+    box-shadow: inset 0 1px 4px rgba(0,0,0,.20);
+  }
   .col.drop-ok { background: rgba(255,255,255,.13); box-shadow: inset 0 0 0 2px rgba(255,255,255,.42); }
   .col.drop-no { background: rgba(220,60,50,.14); box-shadow: inset 0 0 0 2px rgba(230,90,80,.5); }
   .col.hint-src .card.sel { box-shadow: 0 0 0 3px #ffd83d, 0 0 18px rgba(255,216,61,.75); }
@@ -209,36 +214,40 @@
   /* ---------------- 卡牌 ---------------- */
   .card {
     position: absolute; left: 0; width: var(--cw); height: var(--ch);
-    border-radius: calc(var(--cw) * .085);
-    background: linear-gradient(172deg, #ffffff 0%, #fefefd 58%, #f6f7f5 100%);
+    border-radius: calc(var(--cw) * .08);
+    background: #ffffff;            /* 经典纸牌：纯白、无边框 */
     overflow: hidden;
     transition: top .17s cubic-bezier(.3,.7,.35,1), box-shadow .15s;
     box-shadow:
-      0 1px 0 rgba(0,0,0,.20),
-      0 3px 7px rgba(0,0,0,.20),
-      inset 0 0 0 1px rgba(0,0,0,.085);
+      0 1px 0 rgba(0,0,0,.15),
+      0 2px 4px rgba(0,0,0,.20),
+      0 0 0 1px rgba(0,0,0,.05);
     will-change: top;
   }
+  /* 深红古典回纹牌背 */
   .card.down {
-    background: repeating-linear-gradient(45deg, #2e6a9e 0 6px, #1e5080 6px 12px);
+    background-color: #a3161d;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' fill='%23a3161d'/%3E%3Cpath d='M14 3.5L24.5 14L14 24.5L3.5 14Z' fill='none' stroke='%23eda9a9' stroke-width='.9'/%3E%3Cpath d='M14 8.6L19.4 14L14 19.4L8.6 14Z' fill='none' stroke='%23eda9a9' stroke-width='.7'/%3E%3Ccircle cx='14' cy='14' r='1.5' fill='%23eda9a9'/%3E%3C/svg%3E");
+    background-size: 21% auto;
     box-shadow:
-      0 1px 0 rgba(0,0,0,.30),
-      0 3px 7px rgba(0,0,0,.24),
-      inset 0 0 0 1px rgba(255,255,255,.22);
+      0 1px 0 rgba(0,0,0,.24),
+      0 2px 5px rgba(0,0,0,.24),
+      0 0 0 1px rgba(0,0,0,.12);
   }
   /* 背面牌底部压一条暗边，堆叠时层次更分明 */
   .card.down::before {
     content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
-    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.4));
+    background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.35));
     z-index: 3; pointer-events: none;
   }
+  /* 牌背外框：白细线 → 深红 → 白细线 */
   .card.down::after {
-    content: ""; position: absolute; inset: 6.5%;
-    border-radius: calc(var(--cw) * .055);
-    background:
-      repeating-linear-gradient(45deg, rgba(255,255,255,.11) 0 4px, transparent 4px 8px),
-      radial-gradient(120% 90% at 50% 0%, rgba(255,255,255,.20), transparent 68%);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.3);
+    content: ""; position: absolute; inset: 5%;
+    border-radius: calc(var(--cw) * .03);
+    box-shadow:
+      inset 0 0 0 1.5px rgba(255,255,255,.82),
+      inset 0 0 0 3.5px rgba(112,10,10,.55),
+      inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
   .card.grab {
     box-shadow: 0 10px 24px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.28), inset 0 0 0 1px rgba(0,0,0,.1);
@@ -264,34 +273,46 @@
   .corner {
     position: absolute; display: flex; flex-direction: column; align-items: center;
   }
-  .corner.tl { top: 4.5%; left: 7%; }
-  .corner.br { bottom: 4.5%; right: 7%; transform: rotate(180deg); }
+  .corner.tl { top: 4%; left: 6%; }
+  .corner.br { bottom: 4%; right: 6%; transform: rotate(180deg); }
   .corner .rk {
-    font-size: calc(var(--cw) * .245); font-weight: 800;
-    line-height: .9; letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    font-family: "Segoe UI", Arial, Helvetica, "PingFang SC", sans-serif;
+    font-size: calc(var(--cw) * .25); font-weight: 700;
+    line-height: .92; letter-spacing: -.01em; font-variant-numeric: tabular-nums;
   }
   .corner .su-i {
-    width: calc(var(--cw) * .155); height: calc(var(--cw) * .155);
-    margin-top: calc(var(--cw) * .035);
+    width: calc(var(--cw) * .175); height: calc(var(--cw) * .175);
+    margin-top: calc(var(--cw) * .012);
   }
   /* pip 区域按真实扑克比例留白，避免点数互相重叠 */
-  .pips { position: absolute; left: 18%; right: 18%; top: 10.5%; bottom: 10.5%; }
+  .pips { position: absolute; left: 19%; right: 19%; top: 10%; bottom: 10%; }
   .pip {
     position: absolute; transform: translate(-50%,-50%);
-    width: calc(var(--cw) * .16); height: calc(var(--cw) * .16);
+    width: calc(var(--cw) * .18); height: calc(var(--cw) * .18);
   }
   .pip.flip { transform: translate(-50%,-50%) rotate(180deg); }
   .center { position: absolute; inset: 0; display: grid; place-items: center; }
-  .center .su-i.su-big { width: calc(var(--cw) * .5); height: calc(var(--cw) * .5); }
-  .center .pair { display: flex; flex-direction: column; align-items: center; }
-  .center .pair .letter {
-    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
-    font-size: calc(var(--cw) * .44); font-weight: 700; line-height: .92;
+  .center .su-i.su-big { width: calc(var(--cw) * .42); height: calc(var(--cw) * .42); }
+  /* J / Q / K：上下镜像的宫廷人物（经典宫廷牌结构） */
+  /* 人物区收窄，保证每半身高≈宽（经典宫廷牌的构图比例） */
+  .court-figure {
+    position: absolute; left: 15%; right: 15%; top: 10%; bottom: 10%;
+    display: flex; flex-direction: column;
+    padding: 1.5%;
+    border: 1px solid rgba(198,158,62,.45);
+    border-radius: calc(var(--cw) * .035);
   }
-  .center .pair .su-i {
-    width: calc(var(--cw) * .2); height: calc(var(--cw) * .2);
-    margin-top: calc(var(--cw) * .05);
+  /* 遮住上下两个人像身体的接缝 */
+  .court-figure::before {
+    content: ""; position: absolute; left: 6%; right: 6%; top: 50%;
+    height: 1px; background: rgba(198,158,62,.6);
   }
+  .court-figure .fig {
+    flex: 1 1 0; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .court-figure .fig.inv { transform: rotate(180deg); }
+  .court-figure svg { width: 100%; height: 100%; display: block; }
 
   /* 拖拽层 */
   #dragLayer {
@@ -498,7 +519,8 @@ var S = {
   elapsed: 0,
   running: false,
   over: false,
-  undo: []
+  undo: [],
+  spread: 1          // 牌堆间距倍率，滚轮可调（换局保留）
 };
 
 var cardSeq = 0;
@@ -572,6 +594,62 @@ function cardEl(c) {
 function suitIcon(suit, extraCls) {
   return '<i class="su-i su-' + SUIT_KEY[suit] + (extraCls ? " " + extraCls : "") + '"></i>';
 }
+
+// J / Q / K 的宫廷人物（自绘几何风格，红衣=红色花色，蓝衣=黑色花色）
+function courtSVG(rank, suit) {
+  var red = IS_RED[suit];
+  var cloth = red ? "#b0202a" : "#1e56a8";
+  var clothD = red ? "#78121a" : "#12386f";
+  var gold = "#e2b332", goldD = "#8c6a12";
+  var skin = "#f4dcc2", hair = red ? "#8a5a34" : "#33251a";
+  var s = '<svg viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg">';
+
+  // 头发（脸后面）
+  s += '<path d="M34 22Q29 36 34 48L41 45Q35 36 37 24Z" fill="' + hair + '"/>';
+  s += '<path d="M66 22Q71 36 66 48L59 45Q65 36 63 24Z" fill="' + hair + '"/>';
+  // 脸
+  s += '<ellipse cx="50" cy="32" rx="12.5" ry="14.5" fill="' + skin + '" stroke="#c9a184" stroke-width=".9"/>';
+  // 眉眼鼻
+  s += '<ellipse cx="44.5" cy="30" rx="1.7" ry="1.2" fill="#20242a"/>';
+  s += '<ellipse cx="55.5" cy="30" rx="1.7" ry="1.2" fill="#20242a"/>';
+  s += '<path d="M41 26Q44.5 24.5 48 26" fill="none" stroke="' + hair + '" stroke-width="1.1" stroke-linecap="round"/>';
+  s += '<path d="M52 26Q55.5 24.5 59 26" fill="none" stroke="' + hair + '" stroke-width="1.1" stroke-linecap="round"/>';
+  s += '<path d="M50 32L50 38" stroke="#c9a184" stroke-width="1"/>';
+  // 嘴 / 国王的胡子
+  if (rank === 13) {
+    s += '<path d="M42 43Q50 50 58 43Q54 47 50 47Q46 47 42 43Z" fill="' + hair + '"/>';
+  } else {
+    s += '<path d="M45 42Q50 46 55 42" fill="none" stroke="#b5636b" stroke-width="1.6" stroke-linecap="round"/>';
+  }
+  // 身体
+  // 身体：斜肩轮廓，比圆球更像宫廷服的剪影
+  s += '<path d="M22 88Q24 66 36 60L50 68L64 60Q76 66 78 88Z" fill="' + cloth + '" stroke="' + clothD + '" stroke-width="1" stroke-linejoin="round"/>';
+  s += '<path d="M39 62L50 70L61 62" fill="none" stroke="' + gold + '" stroke-width="2.2" stroke-linejoin="round"/>';
+  s += '<path d="M50 73L55 79L50 86L45 79Z" fill="' + gold + '"/>';
+  s += '<path d="M50 76.5L52.5 79L50 81.5L47.5 79Z" fill="' + clothD + '"/>';
+  // 权杖
+  s += '<rect x="18" y="56" width="3" height="32" rx="1.4" fill="' + goldD + '"/>';
+  s += '<circle cx="19.5" cy="53" r="4.2" fill="' + gold + '" stroke="' + goldD + '" stroke-width=".9"/>';
+
+  // 头饰：K 大皇冠 / Q 小皇冠 / J 羽帽
+  if (rank === 13) {
+    s += '<path d="M33 24L37 8L44 16L50 3L56 16L63 8L67 24Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width="1.1" stroke-linejoin="round"/>';
+    s += '<circle cx="50" cy="10" r="2.4" fill="#c0202a"/>';
+    s += '<circle cx="37.5" cy="13" r="1.7" fill="' + cloth + '"/>';
+    s += '<circle cx="62.5" cy="13" r="1.7" fill="' + cloth + '"/>';
+    s += '<rect x="34" y="22" width="32" height="3" rx="1.2" fill="' + goldD + '"/>';
+  } else if (rank === 12) {
+    s += '<path d="M35 25L39 11L50 19L61 11L65 25Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width="1.1" stroke-linejoin="round"/>';
+    s += '<circle cx="50" cy="15" r="2.1" fill="' + cloth + '"/>';
+    s += '<rect x="35" y="23" width="30" height="2.6" rx="1.1" fill="' + goldD + '"/>';
+  } else {
+    s += '<path d="M34 25Q34 9 50 9Q66 9 66 25Z" fill="' + cloth + '" stroke="' + clothD + '" stroke-width="1.1"/>';
+    s += '<rect x="30" y="23" width="40" height="4" rx="1.8" fill="' + clothD + '"/>';
+    s += '<rect x="29" y="21" width="42" height="2.4" rx="1.1" fill="' + gold + '"/>';
+    s += '<path d="M64 12L80 4L74 17Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width=".8"/>';
+  }
+  return s + "</svg>";
+}
 function faceHTML(rank, suit) {
   var icon = suitIcon(suit);
   var tl = '<div class="corner tl"><span class="rk">' + RANK_TXT[rank] + '</span>' + icon + '</div>';
@@ -580,8 +658,10 @@ function faceHTML(rank, suit) {
     return tl + br + '<div class="center">' + suitIcon(suit, "su-big") + '</div>';
   }
   if (rank >= 11) {
-    return tl + br + '<div class="center"><div class="pair">' +
-      '<span class="letter">' + RANK_TXT[rank] + '</span>' + icon + '</div></div>';
+    var fig = courtSVG(rank, suit);
+    return tl + br + '<div class="court-figure">' +
+      '<div class="fig">' + fig + '</div>' +
+      '<div class="fig inv">' + fig + '</div></div>';
   }
   var pts = PIP_LAYOUT[rank];
   var h = '<div class="pips">';
@@ -753,6 +833,7 @@ function renderColumn(ci, maxH) {
     ratio = (maxH - CARD_H) / (total - CARD_H);
     ratio = Math.max(ratio, RATIO_MIN);
   }
+  ratio *= S.spread;   // 玩家可用滚轮手动展开/收缩
   var top = 0;
   for (var k = 0; k < n; k++) {
     var c = cards[k];
@@ -1010,11 +1091,28 @@ function moveRun(fromCol, fromIdx, toCol) {
 
 /* ==================== 交互 ==================== */
 var pointerStart = null;
+var lastSpreadHint = 0;
+
+// 滚轮展开 / 收缩牌堆（牌被挤压时很好用）
+function onWheel(e) {
+  e.preventDefault();
+  var d = e.deltaY > 0 ? -0.07 : 0.07;
+  var next = Math.round(Math.max(0.45, Math.min(1.8, S.spread + d)) * 100) / 100;
+  if (next === S.spread) return;
+  S.spread = next;
+  render();
+  var now = Date.now();
+  if (now - lastSpreadHint > 600) {
+    lastSpreadHint = now;
+    toast("牌堆间距 " + Math.round(S.spread * 100) + "%");
+  }
+}
 
 function bindEvents() {
   var tab = $("tableau");
 
   tab.addEventListener("pointerdown", onDown);
+  tab.addEventListener("wheel", onWheel, { passive: false });
   window.addEventListener("pointermove", onMove, { passive: false });
   window.addEventListener("pointerup", onUp);
   window.addEventListener("pointercancel", onUp);
