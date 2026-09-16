@@ -230,10 +230,10 @@
     background: #ffffff;            /* 经典纸牌：纯白、无边框 */
     overflow: hidden;
     transition: top .17s cubic-bezier(.3,.7,.35,1), box-shadow .15s;
+    /* 只用柔和投影 + 内描边：外描边和 1px 硬阴影会在牌堆叠时形成一排灰线 */
     box-shadow:
-      0 1px 0 rgba(0,0,0,.15),
-      0 2px 4px rgba(0,0,0,.20),
-      0 0 0 1px rgba(0,0,0,.05);
+      0 2px 5px rgba(0,0,0,.14),
+      inset 0 0 0 1px rgba(0,0,0,.06);
     will-change: top;
   }
   /* 深红古典回纹牌背 */
@@ -242,9 +242,8 @@
     background-image: var(--back-pattern);
     background-size: 21% auto;
     box-shadow:
-      0 1px 0 rgba(0,0,0,.24),
-      0 2px 5px rgba(0,0,0,.24),
-      0 0 0 1px rgba(0,0,0,.12);
+      0 2px 5px rgba(0,0,0,.22),
+      inset 0 0 0 1px rgba(0,0,0,.10);
   }
   /* 背面牌底部压一条暗边，堆叠时层次更分明 */
   .card.down::before {
@@ -298,7 +297,7 @@
     margin-top: calc(var(--cw) * .01);
   }
   /* 牌被压扁时：角标缩到刚好塞进露出的那一条，花色放不下就先藏起来 */
-  .card.squeezed .corner.tl { top: calc(var(--cf, 10px) * .12); }
+  .card.squeezed .corner.tl { top: calc(var(--spot, 20px) * .08); }
   .card.squeezed .corner .rk { font-size: var(--cf, calc(var(--cw) * .19)); }
   .card.squeezed .corner .su-i { display: none; }
   /* pip 区左右各留 31%：经典扑克牌的角标就贴在这一侧的留白里，
@@ -863,9 +862,11 @@ function renderColumn(ci, maxH) {
   var cwGuess = CARD_H / 1.4;
   var normalFont = cwGuess * 0.19;
   var fullCornerH = CARD_H * 0.04 + normalFont * 0.84 + cwGuess * 0.12;
-  var cornerFont = Math.min(normalFont, Math.max(6, (spot - CARD_H * 0.035) * 0.8));
+  // 字号取「刚好填满露出高度」（0.92 给顶部留白，除以 0.84 是行高换算）
+  var cornerFont = Math.min(normalFont, Math.max(7, spot * 1.09));
   var squeeze = n > 1 && spot < fullCornerH;
   host.style.setProperty("--cf", cornerFont.toFixed(1) + "px");
+  host.style.setProperty("--spot", spot.toFixed(1) + "px");
   var top = 0;
   for (var k = 0; k < n; k++) {
     var c = cards[k];
