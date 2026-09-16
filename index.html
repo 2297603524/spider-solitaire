@@ -55,6 +55,8 @@
     --up: 30px;
     --down: 17px;
     --fs: .62;          /* 收集槽 / 发牌堆相对卡牌的缩放 */
+    /* 深红古典回纹牌背，牌堆和发牌堆共用同一个图案 */
+    --back-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' fill='%23a3161d'/%3E%3Cpath d='M14 3.5L24.5 14L14 24.5L3.5 14Z' fill='none' stroke='%23eda9a9' stroke-width='.9'/%3E%3Cpath d='M14 8.6L19.4 14L14 19.4L8.6 14Z' fill='none' stroke='%23eda9a9' stroke-width='.7'/%3E%3Ccircle cx='14' cy='14' r='1.5' fill='%23eda9a9'/%3E%3C/svg%3E");
   }
 
   /* ---------------- 顶栏 ---------------- */
@@ -160,9 +162,19 @@
   .stockpile .sp {
     position: absolute; top: 0; width: calc(var(--cw) * var(--fs)); height: calc(var(--ch) * var(--fs));
     border-radius: calc(var(--cw) * .07);
-    background: repeating-linear-gradient(45deg, #245a8d 0 6px, #1b4773 6px 12px);
-    box-shadow: 0 1px 2px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 0 5px rgba(0,0,0,.10);
+    background-color: #a3161d;
+    background-image: var(--back-pattern);
+    background-size: 21% auto;
+    box-shadow: 0 1px 0 rgba(0,0,0,.22), 0 2px 4px rgba(0,0,0,.26), 0 0 0 1px rgba(0,0,0,.12);
     transition: transform .2s, opacity .3s;
+  }
+  .stockpile .sp::after {
+    content: ""; position: absolute; inset: 6%;
+    border-radius: calc(var(--cw) * .03);
+    box-shadow:
+      inset 0 0 0 1.5px rgba(255,255,255,.82),
+      inset 0 0 0 3.5px rgba(112,10,10,.55),
+      inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
   .stockpile:hover .sp { transform: translateY(-3px); }
   .stockpile.dead { cursor: default; }
@@ -227,7 +239,7 @@
   /* 深红古典回纹牌背 */
   .card.down {
     background-color: #a3161d;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' fill='%23a3161d'/%3E%3Cpath d='M14 3.5L24.5 14L14 24.5L3.5 14Z' fill='none' stroke='%23eda9a9' stroke-width='.9'/%3E%3Cpath d='M14 8.6L19.4 14L14 19.4L8.6 14Z' fill='none' stroke='%23eda9a9' stroke-width='.7'/%3E%3Ccircle cx='14' cy='14' r='1.5' fill='%23eda9a9'/%3E%3C/svg%3E");
+    background-image: var(--back-pattern);
     background-size: 21% auto;
     box-shadow:
       0 1px 0 rgba(0,0,0,.24),
@@ -277,18 +289,20 @@
   .corner.br { bottom: 4%; right: 6%; transform: rotate(180deg); }
   .corner .rk {
     font-family: "Segoe UI", Arial, Helvetica, "PingFang SC", sans-serif;
-    font-size: calc(var(--cw) * .25); font-weight: 700;
-    line-height: .92; letter-spacing: -.01em; font-variant-numeric: tabular-nums;
+    font-size: calc(var(--cw) * .19); font-weight: 700;
+    line-height: .84; letter-spacing: -.03em; font-variant-numeric: tabular-nums;
   }
+  .corner .rk.two { transform: scaleX(.78); }
   .corner .su-i {
-    width: calc(var(--cw) * .175); height: calc(var(--cw) * .175);
-    margin-top: calc(var(--cw) * .012);
+    width: calc(var(--cw) * .135); height: calc(var(--cw) * .135);
+    margin-top: calc(var(--cw) * .014);
   }
-  /* pip 区域按真实扑克比例留白，避免点数互相重叠 */
-  .pips { position: absolute; left: 19%; right: 19%; top: 10%; bottom: 10%; }
+  /* pip 区左右各留 31%：经典扑克牌的角标就贴在这一侧的留白里，
+     留不够宽点数就会压到点数字上。（实测经典牌的左右留白约 29~30%） */
+  .pips { position: absolute; left: 31%; right: 31%; top: 17%; bottom: 17%; }
   .pip {
     position: absolute; transform: translate(-50%,-50%);
-    width: calc(var(--cw) * .18); height: calc(var(--cw) * .18);
+    width: calc(var(--cw) * .185); height: calc(var(--cw) * .185);
   }
   .pip.flip { transform: translate(-50%,-50%) rotate(180deg); }
   .center { position: absolute; inset: 0; display: grid; place-items: center; }
@@ -413,10 +427,11 @@
     :root { --fs: .8; }
     .corner.tl { top: 3%; left: 8%; }
     .corner.br { bottom: 3%; right: 8%; }
-    .corner .rk { font-size: calc(var(--cw) * .34); }
-    .corner .su-i { width: calc(var(--cw) * .24); height: calc(var(--cw) * .24); margin-top: calc(var(--cw) * .05); }
-    .pips { left: 16%; right: 16%; top: 9.5%; bottom: 9.5%; }
-    .pip { width: calc(var(--cw) * .18); height: calc(var(--cw) * .18); }
+    .corner .rk { font-size: calc(var(--cw) * .3); }
+    .corner .rk.two { transform: scaleX(.7); }
+    .corner .su-i { width: calc(var(--cw) * .2); height: calc(var(--cw) * .2); margin-top: calc(var(--cw) * .02); }
+    .pips { left: 29%; right: 29%; top: 16%; bottom: 16%; }
+    .pip { width: calc(var(--cw) * .17); height: calc(var(--cw) * .17); }
     .center .su-i.su-big { width: calc(var(--cw) * .54); height: calc(var(--cw) * .54); }
     .center .pair .letter { font-size: calc(var(--cw) * .46); }
     .center .pair .su-i { width: calc(var(--cw) * .22); height: calc(var(--cw) * .22); }
@@ -652,8 +667,10 @@ function courtSVG(rank, suit) {
 }
 function faceHTML(rank, suit) {
   var icon = suitIcon(suit);
-  var tl = '<div class="corner tl"><span class="rk">' + RANK_TXT[rank] + '</span>' + icon + '</div>';
-  var br = '<div class="corner br"><span class="rk">' + RANK_TXT[rank] + '</span>' + icon + '</div>';
+  // "10" 是两位数，横向压窄一点，免得右下角压到点数上
+  var rc = rank === 10 ? "rk two" : "rk";
+  var tl = '<div class="corner tl"><span class="' + rc + '">' + RANK_TXT[rank] + '</span>' + icon + '</div>';
+  var br = '<div class="corner br"><span class="' + rc + '">' + RANK_TXT[rank] + '</span>' + icon + '</div>';
   if (rank === 1) {
     return tl + br + '<div class="center">' + suitIcon(suit, "su-big") + '</div>';
   }
