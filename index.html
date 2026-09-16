@@ -13,7 +13,10 @@
 <meta property="og:type" content="website" />
 <meta property="og:title" content="蜘蛛纸牌 · Spider Solitaire" />
 <meta property="og:description" content="经典蜘蛛纸牌：1/2/4 花色三档难度，支持拖拽、撤销、提示，手机电脑都能玩。" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:image" content="https://2297603524.github.io/spider-solitaire/share.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
 <title>蜘蛛纸牌 · Spider Solitaire</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; }
@@ -1316,6 +1319,12 @@ function init() {
   newGame(1);
   // 保证首帧定位正确
   setTimeout(function () { render(); }, 60);
+  // 手机竖屏塞 10 列，牌只有 30px 出头；横过来能大一倍多
+  setTimeout(function () {
+    if (window.innerHeight > window.innerWidth && window.innerWidth < 640) {
+      toast("把手机横过来，牌会大很多");
+    }
+  }, 1600);
 }
 
 if (document.readyState === "loading") {
