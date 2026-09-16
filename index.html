@@ -294,9 +294,13 @@
   }
   .corner .rk.two { transform: scaleX(.78); }
   .corner .su-i {
-    width: calc(var(--cw) * .135); height: calc(var(--cw) * .135);
-    margin-top: calc(var(--cw) * .014);
+    width: calc(var(--cw) * .11); height: calc(var(--cw) * .11);
+    margin-top: calc(var(--cw) * .01);
   }
+  /* 牌被压扁时：角标缩到刚好塞进露出的那一条，花色放不下就先藏起来 */
+  .card.squeezed .corner.tl { top: calc(var(--cf, 10px) * .12); }
+  .card.squeezed .corner .rk { font-size: var(--cf, calc(var(--cw) * .19)); }
+  .card.squeezed .corner .su-i { display: none; }
   /* pip 区左右各留 31%：经典扑克牌的角标就贴在这一侧的留白里，
      留不够宽点数就会压到点数字上。（实测经典牌的左右留白约 29~30%） */
   .pips { position: absolute; left: 31%; right: 31%; top: 17%; bottom: 17%; }
@@ -429,7 +433,7 @@
     .corner.br { bottom: 3%; right: 8%; }
     .corner .rk { font-size: calc(var(--cw) * .3); }
     .corner .rk.two { transform: scaleX(.7); }
-    .corner .su-i { width: calc(var(--cw) * .2); height: calc(var(--cw) * .2); margin-top: calc(var(--cw) * .02); }
+    .corner .su-i { width: calc(var(--cw) * .17); height: calc(var(--cw) * .17); margin-top: calc(var(--cw) * .012); }
     .pips { left: 29%; right: 29%; top: 16%; bottom: 16%; }
     .pip { width: calc(var(--cw) * .17); height: calc(var(--cw) * .17); }
     .center .su-i.su-big { width: calc(var(--cw) * .54); height: calc(var(--cw) * .54); }
@@ -851,6 +855,17 @@ function renderColumn(ci, maxH) {
     ratio = Math.max(ratio, RATIO_MIN);
   }
   ratio *= S.spread;   // 玩家可用滚轮手动展开/收缩
+
+  // 牌被压扁时，角标会被下一张牌盖掉大半，只剩一截横杠。
+  // 露出高度放不下完整角标（数字+花色）时，切到紧凑档：藏掉花色、字号缩到刚好塞得下，
+  // 保证每张被压住的牌至少还认得出是什么点数。
+  var spot = OFF_UP * ratio;
+  var cwGuess = CARD_H / 1.4;
+  var normalFont = cwGuess * 0.19;
+  var fullCornerH = CARD_H * 0.04 + normalFont * 0.84 + cwGuess * 0.12;
+  var cornerFont = Math.min(normalFont, Math.max(6, (spot - CARD_H * 0.035) * 0.8));
+  var squeeze = n > 1 && spot < fullCornerH;
+  host.style.setProperty("--cf", cornerFont.toFixed(1) + "px");
   var top = 0;
   for (var k = 0; k < n; k++) {
     var c = cards[k];
@@ -871,6 +886,9 @@ function renderColumn(ci, maxH) {
     }
     node.style.top = top + "px";
     node.classList.remove("hidden");
+    // 只有「被下一张盖住的正面牌」才用紧凑角标；顶牌保持正常大小
+    if (squeeze && c.up && k < n - 1) node.classList.add("squeezed");
+    else node.classList.remove("squeezed");
     if (k < n - 1) top += offs[k] * ratio;
   }
   host.style.height = Math.max(CARD_H, top + CARD_H) + "px";
