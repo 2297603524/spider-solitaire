@@ -187,7 +187,14 @@
     position: relative; flex: 1 1 auto;
     display: flex; justify-content: center; gap: var(--gap);
     min-height: 0;
+    /* 极端矮窗口下卡牌已缩到最小仍放不下时，允许滚轮上下看，别把牌压成一条线 */
+    overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.28) transparent;
   }
+  .tableau::-webkit-scrollbar { width: 8px; }
+  .tableau::-webkit-scrollbar-thumb { background: rgba(255,255,255,.26); border-radius: 4px; }
+  .tableau::-webkit-scrollbar-track { background: transparent; }
   .col {
     position: relative; width: var(--cw); flex: 0 0 auto;
     border-radius: calc(var(--cw) * .07);
@@ -366,6 +373,20 @@
   @media (max-width: 430px) {
     .stats .stat:nth-child(3) { display: none; }
   }
+  /* 横屏矮屏（手机横过来）：顶栏与收集区一起压扁，把高度尽量让给牌桌 */
+  @media (max-height: 540px) {
+    :root { --fs: .4; }
+    .topbar { padding: 4px 8px; gap: 5px; }
+    .brand, .sep { display: none; }
+    .stat .k { display: none; }
+    .stat .v { font-size: 12px; }
+    button.btn { padding: 4px 9px; font-size: 11.5px; }
+    .seg button { padding: 3px 8px; font-size: 11px; }
+    .table { padding: 5px 8px 0; }
+    .rail { margin-bottom: 5px; }
+    .stocklabel { font-size: 10px; }
+  }
+
   /* 小屏：收集槽/发牌堆放大，牌面点数加大，保证可读可点 */
   @media (max-width: 620px) {
     :root { --fs: .8; }
@@ -574,33 +595,54 @@ function faceHTML(rank, suit) {
 }
 
 /* ==================== 布局 ==================== */
-function relayout() {
-  var vw = window.innerWidth;
-  var pad = vw < 720 ? 8 : 14;
-  var gap = vw < 560 ? 5 : (vw < 900 ? 8 : 12);
-  var avail = vw - pad * 2;
-  var widthFit = (avail - gap * (COLS - 1)) / COLS;
-  // 高度越充裕，单张牌就画得越大（中后期牌堆变长时会自动压缩间距）
-  var vh = window.innerHeight;
-  var cap = vh > 1080 ? 128 : (vh > 940 ? 118 : (vh > 800 ? 110 : (vh > 660 ? 94 : 80)));
-  var cw = Math.max(26, Math.min(widthFit, cap));
+var RATIO_MIN = 0.52;   // 牌堆叠时的最小压缩比；再往下压，整列就糊成一条条横线了
+
+function applySizes(cw, gap) {
   var ch = cw * 1.4;
-
-  OFF_UP = Math.max(ch * 0.245, 13);
-  OFF_DOWN = Math.max(ch * 0.135, 8);
+  OFF_UP = Math.max(ch * 0.245, 10);
+  OFF_DOWN = Math.max(ch * 0.135, 7);
   CARD_H = ch;
-
   var root = document.documentElement.style;
   root.setProperty("--cw", cw + "px");
   root.setProperty("--ch", ch + "px");
   root.setProperty("--gap", gap + "px");
   root.setProperty("--up", OFF_UP + "px");
   root.setProperty("--down", OFF_DOWN + "px");
+  return ch;
+}
 
-  // 读取 flex 布局给出的真实可用高度（读 clientHeight 会强制同步重排，拿到的是新值）
+function longestColumn() {
+  var n = 1;
+  for (var i = 0; i < S.cols.length; i++) if (S.cols[i].length > n) n = S.cols[i].length;
+  return n;
+}
+
+function relayout() {
+  var vw = window.innerWidth, vh = window.innerHeight;
+  var pad = vw < 720 ? 8 : 14;
+  var gap = vw < 560 ? 5 : (vw < 900 ? 8 : 12);
+  var widthFit = (vw - pad * 2 - gap * (COLS - 1)) / COLS;
+  // 高度越充裕，单张牌就画得越大
+  var cap = vh > 1080 ? 128 : (vh > 940 ? 118 : (vh > 800 ? 110 : (vh > 660 ? 94 : 84)));
+  var cw = Math.max(24, Math.min(widthFit, cap));
+  var ch = applySizes(cw, gap);
+
   var tabEl = document.getElementById("tableau");
   var availH = tabEl ? tabEl.clientHeight : 0;
-  if (!availH) availH = window.innerHeight * 0.62;
+  if (!availH) availH = vh * 0.62;
+
+  // 高度不够时整体缩小卡牌（保持 1.4 比例），而不是把牌间距一路压到看不见
+  var n = longestColumn();
+  for (var iter = 0; iter < 3; iter++) {
+    ch = CARD_H;
+    var need = ch + (n - 1) * OFF_UP * RATIO_MIN;
+    if (need <= availH || cw <= 24) break;
+    var next = Math.max(24, cw * (availH / need) * 0.97);  // 留 3% 余量，避免来回抖
+    if (cw - next < 0.5) break;
+    cw = next;
+    ch = applySizes(cw, gap);
+    availH = tabEl ? tabEl.clientHeight : availH;   // 牌变小 → 收集区也变矮 → 可用高度还能再涨
+  }
   return Math.max(availH, ch * 1.6);
 }
 
@@ -709,7 +751,7 @@ function renderColumn(ci, maxH) {
   var ratio = 1;
   if (total > maxH && total > CARD_H) {
     ratio = (maxH - CARD_H) / (total - CARD_H);
-    ratio = Math.max(ratio, 0.34);
+    ratio = Math.max(ratio, RATIO_MIN);
   }
   var top = 0;
   for (var k = 0; k < n; k++) {
