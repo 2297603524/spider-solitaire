@@ -134,6 +134,25 @@
   button.btn:hover { background: rgba(255,255,255,.19); border-color: rgba(255,255,255,.3); }
   button.btn:active { transform: translateY(1px); }
   button.btn[disabled] { opacity: .34; cursor: default; transform: none; }
+  /* 按钮按下有回弹手感 */
+  button.btn { transition: transform .13s cubic-bezier(.3,1.4,.5,1), background .18s, box-shadow .18s, opacity .18s; }
+  button.btn:hover:not([disabled]) { transform: translateY(-1.5px); }
+  button.btn:active:not([disabled]) { transform: translateY(0) scale(.965); }
+
+  /* 可放置的列：呼吸光提示 */
+  .col.drop-ok { animation: dropPulse 1.05s ease-in-out infinite; }
+  @keyframes dropPulse {
+    0%, 100% { box-shadow: inset 0 0 0 2px rgba(255,255,255,.42); }
+    50%      { box-shadow: inset 0 0 0 2px rgba(255,255,255,.78), 0 0 18px rgba(255,255,255,.32); }
+  }
+
+  /* 收集槽到手时弹一下 */
+  .fslot.got { animation: slotGot .42s cubic-bezier(.25,1.5,.45,1) both; }
+  @keyframes slotGot {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.16); }
+    100% { transform: scale(1); }
+  }
   button.btn.primary {
     background: linear-gradient(180deg,#f068ab,#ca3980);
     border-color: rgba(255,255,255,.34);
@@ -302,11 +321,50 @@
       inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
   /* 发牌入场：逐张从上方落入 */
-  .card.enter { animation: cardDrop .36s cubic-bezier(.2,1.3,.4,1) both; }
-  @keyframes cardDrop {
-    0%   { transform: translateY(-24px) scale(.93); opacity: 0; }
-    60%  { opacity: 1; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
+  /* 飞行动画统一用 --dx/--dy 描述「从哪里来」，由 JS 按真实坐标算出来。
+     动画期间关掉 top 的过渡、临时抬高 z-index，避免和 transition 打架、并保证盖住邻列。 */
+
+  /* 发牌：从发牌堆飞出 */
+  .card.deal {
+    transition: none;
+    z-index: 80;
+    animation: cardDeal .46s cubic-bezier(.18,.92,.28,1) both;
+  }
+  @keyframes cardDeal {
+    0%   { transform: translate3d(var(--dx, 0px), var(--dy, -40px), 0) rotate(-12deg) scale(.84); opacity: 0; }
+    15%  { opacity: 1; }
+    68%  { transform: translate3d(0, 0, 0) rotate(2.5deg) scale(1.03); }
+    100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); opacity: 1; }
+  }
+
+  /* 移动 / 撤销：从旧位置滑到新位置 */
+  .card.fly {
+    transition: none;
+    z-index: 80;
+    animation: cardFly .34s cubic-bezier(.2,.88,.3,1) both;
+  }
+  @keyframes cardFly {
+    0%   { transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0) scale(1.05); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+  }
+
+  /* 收进收集槽：缩小飞走 */
+  .card.collect {
+    transition: none;
+    z-index: 90;
+    pointer-events: none;
+    animation: cardCollect .38s cubic-bezier(.3,.85,.35,1) both;
+  }
+  @keyframes cardCollect {
+    0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+    100% { transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0) scale(.42) rotate(-8deg); opacity: 0; }
+  }
+
+  /* 翻牌：轻微下压 + 回弹 */
+  .card.flip-in { animation: cardFlipIn .26s cubic-bezier(.3,1.4,.5,1) both; }
+  @keyframes cardFlipIn {
+    0%   { transform: scale(.94) rotateY(-16deg); }
+    100% { transform: scale(1) rotateY(0deg); }
   }
 
   .card.grab {
@@ -392,6 +450,12 @@
     pointer-events: none; z-index: 9000;
   }
   #dragLayer .card { transition: none; }
+  /* 收进收集槽的临时飞牌 */
+  #dragLayer .card.ghostfly {
+    position: absolute; transform-origin: 0 0;
+    box-shadow: 0 6px 20px rgba(150,40,110,.35);
+    transition: transform .46s cubic-bezier(.32,.86,.34,1), opacity .46s ease-in !important;
+  }
 
   /* 飘分 */
   .float {
@@ -1058,11 +1122,25 @@ function restore(str) {
 }
 function doUndo() {
   if (!S.undo.length) return;
+
+  // 记下撤销前每张牌的位置，撤销后让位移过的牌滑回去
+  var beforeMap = {};
+  var nodes = document.querySelectorAll("#tableau .card");
+  for (var i = 0; i < nodes.length; i++) {
+    beforeMap[nodes[i].dataset.id] = nodes[i].getBoundingClientRect();
+  }
+
   restore(S.undo.pop());
   clearHints();
   render();
   updateStats();
   SFX.flip();
+
+  nodes = document.querySelectorAll("#tableau .card");
+  for (var j = 0; j < nodes.length; j++) {
+    var b = beforeMap[nodes[j].dataset.id];
+    if (b) flyCard(nodes[j], b, "fly");
+  }
 }
 
 /* ==================== 收集完成组 ==================== */
@@ -1076,11 +1154,14 @@ function collectRuns(silent) {
     if (!isRun(col, start)) continue;
     if (col[start].r !== 13) continue;
     var suit = col[start].s;
+    // 移除前先量一下顶牌位置，稍后用它做「飞进收集槽」的动画
+    var headEl = colEls[c] ? colEls[c].querySelector('[data-id="' + col[start].id + '"]') : null;
+    var headRect = headEl ? headEl.getBoundingClientRect() : null;
     // 移除
     var removed = col.splice(start, 13);
     S.done.push(suit);
     S.score += 100;
-    found.push({ col: c, suit: suit, cards: removed });
+    found.push({ col: c, suit: suit, cards: removed, headRect: headRect });
     if (col.length && !col[col.length - 1].up) col[col.length - 1].up = true;
   }
   if (found.length) {
@@ -1093,9 +1174,50 @@ function collectRuns(silent) {
     }
     render();   // 自身保证 UI 同步
     updateStats();
+    // render 之后收集槽才有位置，这时再放飞牌
+    if (!silent) {
+      for (var fi = 0; fi < found.length; fi++) {
+        flyToSlot(found[fi].headRect, found[fi].suit, S.done.length - found.length + fi);
+      }
+    }
     if (S.done.length >= 8) setTimeout(win, 420);
   }
   return found.length > 0;
+}
+
+// 收牌：在收集区造一张临时牌，从原位置缩小飞进收集槽
+function flyToSlot(fromRect, suit, slotIdx) {
+  if (!fromRect) return;
+  var slots = document.querySelectorAll(".fslot");
+  var slot = slots[Math.min(slotIdx, slots.length - 1)];
+  if (!slot) return;
+  var sr = slot.getBoundingClientRect();
+
+  var ghost = el("div", "card up su" + suit + " ghostfly");
+  ghost.style.left = fromRect.left + "px";
+  ghost.style.top = fromRect.top + "px";
+  ghost.style.width = fromRect.width + "px";
+  ghost.style.height = fromRect.height + "px";
+  var face = el("div", "face");
+  face.innerHTML = faceHTML(13, suit);
+  ghost.appendChild(face);
+  document.getElementById("dragLayer").appendChild(ghost);
+
+  var dx = sr.left - fromRect.left;
+  var dy = sr.top - fromRect.top;
+  var sc = sr.width / fromRect.width;
+
+  requestAnimationFrame(function () {
+    ghost.style.transform =
+      "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) scale(" + sc.toFixed(3) + ")";
+    ghost.style.opacity = "0";
+  });
+  // 飞牌抵达那一刻，让收集槽弹一下
+  setTimeout(function () {
+    if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    slot.classList.add("got");
+    slot.addEventListener("animationend", function () { this.classList.remove("got"); }, { once: true });
+  }, 470);
 }
 
 function floatText(txt, x, y) {
@@ -1108,6 +1230,68 @@ function floatText(txt, x, y) {
 }
 
 /* ==================== 发牌 ==================== */
+/* ==================== 飞行动画 ==================== */
+// 每张牌动画时临时抬高所属列的层级，保证它飞越其他列时不会被挡
+var _colAnimating = [];
+
+function _raiseCol(node) {
+  var col = node.parentNode;
+  if (!col || col.classList.contains("col") === false) return;
+  var i = _colAnimating.indexOf(col);
+  if (i < 0) _colAnimating.push(col);
+  col.style.zIndex = "60";
+}
+
+function _lowerCol(node) {
+  var col = node.parentNode;
+  if (!col) return;
+  var i = _colAnimating.indexOf(col);
+  if (i >= 0) {
+    _colAnimating.splice(i, 1);
+    if (_colAnimating.indexOf(col) < 0) col.style.zIndex = "";
+  }
+}
+
+/**
+ * 让一张牌从 fromRect 的位置飞到它现在的位置。
+ * 传 null 或位移太小就跳过。
+ */
+function flyCard(node, fromRect, cls) {
+  if (!node || !fromRect) return;
+  var r = node.getBoundingClientRect();
+  var dx = fromRect.left - r.left;
+  var dy = fromRect.top - r.top;
+  if (Math.abs(dx) < 1.5 && Math.abs(dy) < 1.5) return;
+
+  node.style.setProperty("--dx", dx.toFixed(1) + "px");
+  node.style.setProperty("--dy", dy.toFixed(1) + "px");
+  _raiseCol(node);
+  node.classList.add(cls);
+  node.addEventListener("animationend", function () {
+    node.classList.remove(cls);
+    node.style.removeProperty("--dx");
+    node.style.removeProperty("--dy");
+    _lowerCol(node);
+  }, { once: true });
+}
+
+// 收集一批牌的当前矩形，供移动后再算位移
+function snapshotCards(ids) {
+  var out = [];
+  for (var i = 0; i < ids.length; i++) {
+    var n = document.querySelector('#tableau .card[data-id="' + ids[i] + '"]');
+    out.push(n ? n.getBoundingClientRect() : null);
+  }
+  return out;
+}
+
+function flyCardsById(ids, rects, cls) {
+  for (var i = 0; i < ids.length; i++) {
+    var n = document.querySelector('#tableau .card[data-id="' + ids[i] + '"]');
+    if (n) flyCard(n, rects[i], cls);
+  }
+}
+
 function dealStock() {
   if (S.over) return;
   if (S.stock <= 0) { toast("牌已经发完了"); SFX.deny(); return; }
@@ -1141,18 +1325,34 @@ function dealStock() {
   render();
   updateStats();
 
-  // 新发的 10 张逐列错落入场，像真的在发牌
+  // 新发的 10 张：从发牌堆依次飞出，逐列错开，像真的在发牌
+  var sp = $("stockpile");
+  var spr = sp ? sp.getBoundingClientRect() : null;
+  var ocx = spr ? spr.left + spr.width * 0.5 : null;
+  var ocy = spr ? spr.top + spr.height * 0.5 : null;
+
   for (var k2 = 0; k2 < COLS; k2++) {
     var clubCol = S.cols[k2];
     var lastCard = clubCol[clubCol.length - 1];
     if (!lastCard) continue;
     var node = colEls[k2].querySelector('[data-id="' + lastCard.id + '"]');
     if (!node) continue;
-    node.classList.add("enter");
-    node.style.animationDelay = (k2 * 0.038).toFixed(3) + "s";
+
+    var r = node.getBoundingClientRect();
+    var dx = ocx === null ? 0 : ocx - (r.left + r.width * 0.5);
+    var dy = ocy === null ? -60 : ocy - (r.top + r.height * 0.5);
+
+    node.style.setProperty("--dx", dx.toFixed(1) + "px");
+    node.style.setProperty("--dy", dy.toFixed(1) + "px");
+    _raiseCol(node);
+    node.classList.add("deal");
+    node.style.animationDelay = (k2 * 0.045).toFixed(3) + "s";
     node.addEventListener("animationend", function () {
-      this.classList.remove("enter");
+      this.classList.remove("deal");
+      this.style.removeProperty("--dx");
+      this.style.removeProperty("--dy");
       this.style.animationDelay = "";
+      _lowerCol(this);
     }, { once: true });
   }
 
@@ -1203,8 +1403,10 @@ function moveRun(fromCol, fromIdx, toCol) {
   for (var i = 0; i < cards.length; i++) S.cols[toCol].push(cards[i]);
   // 翻开
   var f = S.cols[fromCol];
+  var flippedId = null;
   if (f.length && !f[f.length - 1].up) {
     f[f.length - 1].up = true;
+    flippedId = f[f.length - 1].id;
     SFX.flip();
   }
   S.moves++;
@@ -1213,6 +1415,17 @@ function moveRun(fromCol, fromIdx, toCol) {
   collectRuns(false);
   render();
   updateStats();
+
+  // 刚翻出来的那张牌给个翻转动效
+  if (flippedId !== null) {
+    var fn = document.querySelector('#tableau .card[data-id="' + flippedId + '"]');
+    if (fn) {
+      fn.classList.add("flip-in");
+      fn.addEventListener("animationend", function () {
+        this.classList.remove("flip-in");
+      }, { once: true });
+    }
+  }
   return true;
 }
 
@@ -1436,7 +1649,11 @@ function onUp(e) {
       var node = colEls[d.col].querySelector('[data-id="' + S.cols[d.col][k].id + '"]');
       if (node) node.classList.remove("hidden");
     }
+    // 先记下移动前的真实位置，重绘后让这几张牌从原处滑过去
+    var movingIds = S.cols[d.col].slice(d.idx).map(function (c) { return c.id; });
+    var before = snapshotCards(movingIds);
     moveRun(d.col, d.idx, target);
+    flyCardsById(movingIds, before, "fly");
   } else {
     // 回弹
     for (var m = d.idx; m < S.cols[d.col].length; m++) {
@@ -1472,7 +1689,10 @@ function tryAutoMove(ci, idx) {
   var pick = nonEmpty.length ? nonEmpty[0] : targets[0];
   // 若拖动的是整列且目标是空列，跳过（无意义）
   if (S.cols[pick].length === 0 && idx === 0) return;
+  var ids = S.cols[ci].slice(idx).map(function (c) { return c.id; });
+  var before = snapshotCards(ids);
   moveRun(ci, idx, pick);
+  flyCardsById(ids, before, "fly");
 }
 
 function tryAutoToEmpty(emptyCol) {
