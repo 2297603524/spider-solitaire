@@ -32,13 +32,22 @@
     display: flex;
     flex-direction: column;
     font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
-    /* 樱花粉 × 薰衣草紫，柔和光斑 + 斜向渐变 */
+    /* 底层插画 + 半透明粉紫渐变覆盖（保证卡牌依然清晰可读） */
     background-color: #dd8ec6;
     background-image:
-      radial-gradient(52% 36% at 10% 6%, rgba(255,255,255,.52), transparent 62%),
-      radial-gradient(44% 30% at 90% 12%, rgba(198,160,255,.46), transparent 64%),
-      radial-gradient(60% 40% at 50% 100%, rgba(255,168,216,.42), transparent 66%),
-      linear-gradient(155deg, #f2aada 0%, #e292ca 38%, #cb92e2 72%, #b995ea 100%);
+      radial-gradient(52% 36% at 10% 6%, rgba(255,255,255,.40), transparent 62%),
+      radial-gradient(44% 30% at 90% 12%, rgba(198,160,255,.34), transparent 64%),
+      linear-gradient(155deg,
+        rgba(242,170,218,.74) 0%,
+        rgba(226,146,202,.66) 38%,
+        rgba(203,146,226,.68) 72%,
+        rgba(185,149,234,.76) 100%),
+      url("art/bg-art.jpg");
+    background-size: auto, auto, auto, cover;
+    background-position: 0 0, 0 0, 0 0, center 22%;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+    background-attachment: scroll, scroll, scroll, fixed;
+    background-blend-mode: normal;
     color: #fdeef7;
     overflow: hidden;
     -webkit-user-select: none; user-select: none;
@@ -53,6 +62,18 @@
     will-change: transform;
     animation: petalFall linear infinite;
   }
+  /* 通关彩带：从面板位置向上喷射再落下 */
+  .confetti {
+    position: fixed; z-index: 9700; pointer-events: none;
+    border-radius: 1.5px;
+    animation: confettiBurst 1.6s cubic-bezier(.18,.72,.4,1) both;
+  }
+  @keyframes confettiBurst {
+    0%   { transform: translate3d(0,0,0) rotate(0deg) scale(.6); opacity: 1; }
+    32%  { transform: translate3d(calc(var(--dx) * .72), var(--dy), 0) rotate(calc(var(--rot) * .38)) scale(1); opacity: 1; }
+    100% { transform: translate3d(var(--dx), calc(var(--dy) * -1.7), 0) rotate(var(--rot)) scale(1); opacity: 0; }
+  }
+
   @keyframes petalFall {
     0%   { transform: translate3d(0, -36px, 0) rotate(0deg); }
     100% { transform: translate3d(var(--drift, 40px), 105vh, 0) rotate(600deg); }
@@ -280,12 +301,22 @@
       inset 0 0 0 3.5px rgba(112,10,58,.5),
       inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
+  /* 发牌入场：逐张从上方落入 */
+  .card.enter { animation: cardDrop .36s cubic-bezier(.2,1.3,.4,1) both; }
+  @keyframes cardDrop {
+    0%   { transform: translateY(-24px) scale(.93); opacity: 0; }
+    60%  { opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
   .card.grab {
     box-shadow: 0 10px 24px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.28), inset 0 0 0 1px rgba(0,0,0,.1);
   }
   .card.hidden { visibility: hidden; }
-  .card.red { color: #e8398a; }      /* 红桃/方块 → 亮玫红 */
-  .card.black { color: #9c1e5f; }    /* 黑桃/梅花 → 深玫红 */
+  /* 两组花色必须一眼分开：红桃/方块走亮粉，黑桃/梅花走深紫。
+     色相（粉 340° vs 紫 272°）和明度都拉开，压在粉紫桌布上也不会糊。 */
+  .card.red { color: #ff4f8b; }      /* 红桃 / 方块 → 亮玫粉 */
+  .card.black { color: #4a1d7a; }    /* 黑桃 / 梅花 → 深紫 */
 
   /* 矢量花色：用 mask 上色，跨平台形状统一、边缘锐利，不受系统字体影响 */
   .su-i {
@@ -402,7 +433,22 @@
     transform: scale(.9); transition: transform .4s cubic-bezier(.2,1.4,.4,1);
   }
   .overlay.show .panel { transform: scale(1); }
-  .panel .crown { font-size: 46px; line-height: 1; margin-bottom: 6px; }
+  /* 通关头像：渐变光环比心圆框 */
+  .win-avatar {
+    width: 112px; height: 112px; margin: 0 auto 14px; padding: 3px;
+    border-radius: 50%;
+    background: linear-gradient(140deg, #ffe3f1, #f58cc6, #c9a8ff);
+    box-shadow: 0 10px 28px rgba(190,60,140,.45), 0 0 0 6px rgba(255,255,255,.14);
+    animation: avatarPop .65s cubic-bezier(.2,1.6,.4,1) both;
+  }
+  .win-avatar img {
+    width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; object-position: 50% 22%; display: block;
+  }
+  @keyframes avatarPop {
+    0%   { transform: scale(.45) rotate(-14deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
   .panel h2 { margin: 0 0 6px; font-size: 25px; letter-spacing: .5px; }
   .panel .sub { color: #f3bdd9; font-size: 13px; margin-bottom: 20px; }
   .panel .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 22px; }
@@ -506,7 +552,7 @@
 
 <div class="overlay" id="overlay">
   <div class="panel">
-    <div class="crown">🏆</div>
+    <div class="win-avatar"><img src="art/win-art.jpg" alt="" /></div>
     <h2 id="winTitle">恭喜通关！</h2>
     <div class="sub" id="winSub">8 组同花顺全部收齐</div>
     <div class="grid">
@@ -637,10 +683,11 @@ function suitIcon(suit, extraCls) {
 // J / Q / K 的宫廷人物（自绘几何风格，红衣=红色花色，蓝衣=黑色花色）
 function courtSVG(rank, suit) {
   var red = IS_RED[suit];
-  var cloth = red ? "#b0202a" : "#1e56a8";
-  var clothD = red ? "#78121a" : "#12386f";
+  // 衣服配色和花色保持一致：红桃/方块=玫粉，黑桃/梅花=深紫
+  var cloth = red ? "#f0568f" : "#5b2a8c";
+  var clothD = red ? "#b81f5f" : "#3a1a63";
   var gold = "#e2b332", goldD = "#8c6a12";
-  var skin = "#f4dcc2", hair = red ? "#8a5a34" : "#33251a";
+  var skin = "#f4dcc2", hair = red ? "#8a5a34" : "#2a1b3d";
   var s = '<svg viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg">';
 
   // 头发（脸后面）
@@ -1086,6 +1133,22 @@ function dealStock() {
   collectRuns(false);
   render();
   updateStats();
+
+  // 新发的 10 张逐列错落入场，像真的在发牌
+  for (var k2 = 0; k2 < COLS; k2++) {
+    var clubCol = S.cols[k2];
+    var lastCard = clubCol[clubCol.length - 1];
+    if (!lastCard) continue;
+    var node = colEls[k2].querySelector('[data-id="' + lastCard.id + '"]');
+    if (!node) continue;
+    node.classList.add("enter");
+    node.style.animationDelay = (k2 * 0.038).toFixed(3) + "s";
+    node.addEventListener("animationend", function () {
+      this.classList.remove("enter");
+      this.style.animationDelay = "";
+    }, { once: true });
+  }
+
   if (S.stock === 0) toast("最后 10 张已发出");
 }
 
@@ -1500,6 +1563,7 @@ function win() {
   if (S.elapsed > 0) bonus = Math.max(0, Math.floor((600 - S.elapsed) / 10) * 2);
   if (bonus > 0) S.score += bonus;
   SFX.win();
+  burstConfetti();
   updateStats();
   $("wTime").textContent = fmtTime(S.elapsed);
   $("wMoves").textContent = S.moves;
@@ -1530,6 +1594,28 @@ function spawnPetals() {
       "%3Cpath d='M12 1C7 6.5 2.5 11 2.5 15.5 2.5 19.6 5.6 23 9.3 23c1.1 0 2-.5 2.7-1.3.7.8 1.6 1.3 2.7 1.3 " +
       "3.7 0 6.8-3.4 6.8-7.5C21.5 11 17 6.5 12 1Z' fill='" + fills[i % fills.length] + "'/%3E%3C/svg%3E\")";
     host.appendChild(p);
+  }
+}
+
+/* ==================== 通关彩带 ==================== */
+function burstConfetti() {
+  var colors = ["#ff8fc2", "#f7c948", "#c9a8ff", "#ffffff", "#ff5fa8", "#ffd6ea"];
+  var host = document.getElementById("petals") || document.body;
+  for (var i = 0; i < 38; i++) {
+    var c = document.createElement("i");
+    c.className = "confetti";
+    var sz = 6 + Math.random() * 7;
+    c.style.left = (26 + Math.random() * 48).toFixed(1) + "%";
+    c.style.top = "44%";
+    c.style.width = sz.toFixed(1) + "px";
+    c.style.height = (sz * 0.55).toFixed(1) + "px";
+    c.style.background = colors[i % colors.length];
+    c.style.setProperty("--dx", ((Math.random() - 0.5) * 560).toFixed(0) + "px");
+    c.style.setProperty("--dy", (-130 - Math.random() * 300).toFixed(0) + "px");
+    c.style.setProperty("--rot", (Math.random() * 900 - 450).toFixed(0) + "deg");
+    c.style.animationDelay = (Math.random() * 0.3).toFixed(2) + "s";
+    c.addEventListener("animationend", function () { this.remove(); }, { once: true });
+    host.appendChild(c);
   }
 }
 
