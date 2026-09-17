@@ -452,6 +452,20 @@
   /* 1 花色时收进收集槽的牌也跟着变粉 */
   body.solo .card.su0.ghostfly { color: #ff5fa8; }
 
+  /* ---------------- 二次元卡面 ---------------- */
+  /* 按花色给极淡的渐变底色（白 → 花色淡染），一眼仍有花色氛围但不影响读牌 */
+  .card.up.su0 { background: linear-gradient(168deg, #ffffff 32%, #efe9ff 100%); }
+  .card.up.su1 { background: linear-gradient(168deg, #ffffff 32%, #ffeef6 100%); }
+  .card.up.su2 { background: linear-gradient(168deg, #ffffff 32%, #fff4e0 100%); }
+  .card.up.su3 { background: linear-gradient(168deg, #ffffff 32%, #e6f9f6 100%); }
+  body.solo .card.up.su0 { background: linear-gradient(168deg, #ffffff 32%, #ffe9f4 100%); }
+  /* 卡面内框：一圈细的同花色描边，二次元卡牌的"卡片感"（画在 face 最底层，不压角标） */
+  .card.up .face::before {
+    content: ""; position: absolute; inset: 3px; pointer-events: none;
+    border-radius: calc(var(--cw) * .055);
+    border: 1.5px solid currentColor; opacity: .22;
+  }
+
   /* 矢量花色：用 mask 上色，跨平台形状统一、边缘锐利，不受系统字体影响 */
   .su-i {
     display: block;
@@ -473,8 +487,8 @@
   .corner.tl { top: 4%; left: 6%; }
   .corner.br { bottom: 4%; right: 6%; transform: rotate(180deg); }
   .corner .rk {
-    font-family: "Segoe UI", Arial, Helvetica, "PingFang SC", sans-serif;
-    font-size: calc(var(--cw) * .19); font-weight: 700;
+    font-family: "Yuanti SC", "YouYuan", "幼圆", "Segoe UI", Arial, Helvetica, "PingFang SC", sans-serif;
+    font-size: calc(var(--cw) * .19); font-weight: 800;
     line-height: .84; letter-spacing: -.03em; font-variant-numeric: tabular-nums;
   }
   .corner .rk.two { transform: scaleX(.78); }
@@ -496,14 +510,24 @@
   .pip.flip { transform: translate(-50%,-50%) rotate(180deg); }
   .center { position: absolute; inset: 0; display: grid; place-items: center; }
   .center .su-i.su-big { width: calc(var(--cw) * .42); height: calc(var(--cw) * .42); }
+  /* A 的二次元处理：中央花色加同色光晕，两角点缀四角星 */
+  .center .su-i.su-big { filter: drop-shadow(0 0 5px); }
+  .center::before, .center::after {
+    content: ""; position: absolute; background: currentColor;
+    clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+  }
+  .center::before { width: calc(var(--cw) * .13); height: calc(var(--cw) * .13); top: 19%; left: 21%; opacity: .42; }
+  .center::after  { width: calc(var(--cw) * .09); height: calc(var(--cw) * .09); bottom: 17%; right: 19%; opacity: .3; }
   /* J / Q / K：上下镜像的宫廷人物（经典宫廷牌结构） */
   /* 人物区收窄，保证每半身高≈宽（经典宫廷牌的构图比例） */
   .court-figure {
     position: absolute; left: 15%; right: 15%; top: 10%; bottom: 10%;
     display: flex; flex-direction: column;
     padding: 1.5%;
-    border: 1px solid rgba(233,150,196,.55);
+    /* 同花色细描边 + 顶部白色薄纱，二次元卡片框 */
+    border: 1.5px solid currentColor;
     border-radius: calc(var(--cw) * .035);
+    background: linear-gradient(175deg, rgba(255,255,255,.5), rgba(255,255,255,0) 46%);
   }
   /* 上下两个人像在中线相接，不画分隔线（画了会从人像身上穿过去） */
   .court-figure .fig {
