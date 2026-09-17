@@ -102,8 +102,9 @@
     display: flex; align-items: center; gap: 8px;
     padding: 8px 14px;
     background: linear-gradient(180deg, rgba(80,6,44,.62), rgba(80,6,44,.26));
-    border-bottom: 1px solid rgba(255,255,255,.10);
-    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 6px 20px rgba(58,2,32,.26);
+    backdrop-filter: blur(10px);
     flex-wrap: wrap;
   }
   .brand {
@@ -169,10 +170,34 @@
   .seg button.on { background: rgba(255,255,255,.95); color: #a5236b; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
   .seg button:not(.on):hover { color: #fff; background: rgba(255,255,255,.09); }
 
-  .stats { display: flex; gap: 16px; align-items: center; }
-  .stat { text-align: right; line-height: 1.15; }
-  .stat .k { font-size: 9.5px; letter-spacing: 1.1px; text-transform: uppercase; color: #f6bfdc; font-weight: 700; }
-  .stat .v { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+  /* 统计做成一个胶囊卡片，三项之间用细分隔线，比三个数字裸着排更有整体感 */
+  .stats {
+    display: flex; align-items: stretch;
+    background: rgba(46,2,26,.34);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    padding: 4px 3px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 8px rgba(70,4,38,.16);
+  }
+  .stat {
+    position: relative;
+    text-align: center; line-height: 1.14;
+    padding: 1px 13px;
+    min-width: 58px;
+  }
+  .stat + .stat::before {
+    content: ""; position: absolute; left: 0; top: 16%; bottom: 16%;
+    width: 1px; background: rgba(255,255,255,.14);
+  }
+  .stat .k { font-size: 9px; letter-spacing: 1.1px; text-transform: uppercase; color: #f3b4d4; font-weight: 700; }
+  .stat .v { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; letter-spacing: .2px; }
+  /* 分数变化时轻微跳一下 */
+  .stat .v.bump { animation: statBump .34s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes statBump {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.18); color: #ffe9a8; }
+    100% { transform: scale(1); }
+  }
 
   /* ---------------- 牌桌 ---------------- */
   .table {
@@ -189,13 +214,25 @@
   }
 
   /* 收集区 */
-  .foundations { display: flex; gap: 6px; }
+  /* 收集区做成一个带毛玻璃的托盘，8 个槽收进去，比散着放精致 */
+  .foundations {
+    display: flex; gap: 7px;
+    padding: 7px 9px;
+    border-radius: 15px;
+    background: linear-gradient(180deg, rgba(64,4,36,.46), rgba(64,4,36,.30));
+    border: 1px solid rgba(255,255,255,.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.10),
+      inset 0 -1px 0 rgba(0,0,0,.14),
+      0 4px 16px rgba(64,4,36,.22);
+    backdrop-filter: blur(8px);
+  }
   .fslot {
     width: calc(var(--cw) * var(--fs)); height: calc(var(--ch) * var(--fs));
     border-radius: calc(var(--cw) * .07);
-    border: 1.5px dashed rgba(255,255,255,.45);
-    background: rgba(255,255,255,.16);
-    backdrop-filter: blur(3px);
+    border: 1.5px dashed rgba(255,255,255,.30);
+    background: rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 4px rgba(74,6,42,.20);
     display: grid; place-items: center;
     font-size: calc(var(--cw) * .25); line-height: 1;
     position: relative; overflow: hidden;
@@ -245,7 +282,16 @@
   }
   .stockpile.bump { animation: bump .4s; }
   @keyframes bump { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-  .stocklabel { font-size: 11px; color: #f6bfdc; font-weight: 700; letter-spacing: .5px; white-space: nowrap; }
+  .stocklabel {
+    font-size: 11px; color: #ffe6f4; font-weight: 700; letter-spacing: .4px;
+    white-space: nowrap;
+    background: rgba(74,6,42,.34);
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 999px;
+    padding: 5px 11px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    backdrop-filter: blur(6px);
+  }
 
   /* 列 */
   .tableau {
@@ -320,6 +366,18 @@
       inset 0 0 0 3.5px rgba(112,10,58,.5),
       inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
+  /* 正面牌顶部的柔光，像覆了一层玻璃 */
+  .card.up::after {
+    content: ""; position: absolute; inset: 0; z-index: 2;
+    border-radius: inherit; pointer-events: none;
+    /* 只压在牌顶一条窄带上（0→14%），避免盖住 4% 起笔的角标数字 */
+    background: linear-gradient(172deg,
+      rgba(255,255,255,.62) 0%,
+      rgba(255,255,255,.22) 6%,
+      rgba(255,255,255,0) 15%);
+  }
+  .card.squeezed.up::after { opacity: .3; }
+
   /* 发牌入场：逐张从上方落入 */
   /* 飞行动画统一用 --dx/--dy 描述「从哪里来」，由 JS 按真实坐标算出来。
      动画期间关掉 top 的过渡、临时抬高 z-index，避免和 transition 打架、并保证盖住邻列。 */
@@ -1068,10 +1126,25 @@ function renderFoundations() {
 }
 
 function updateStats() {
-  $("vScore").textContent = S.score;
-  $("vMoves").textContent = S.moves;
+  var scoreEl = $("vScore"), movesEl = $("vMoves");
+  var prevScore = scoreEl.textContent, prevMoves = movesEl.textContent;
+
+  scoreEl.textContent = S.score;
+  movesEl.textContent = S.moves;
   $("vTime").textContent = fmtTime(S.elapsed);
   $("btnUndo").disabled = S.undo.length === 0;
+
+  // 数值真的变了才跳一下，避免每次 render 都闪
+  bumpStat(scoreEl, prevScore);
+  bumpStat(movesEl, prevMoves);
+}
+
+function bumpStat(elm, prev) {
+  if (elm.textContent === prev) return;
+  elm.classList.remove("bump");
+  void elm.offsetWidth;          // 强制重排，让动画能重播
+  elm.classList.add("bump");
+  elm.addEventListener("animationend", function () { this.classList.remove("bump"); }, { once: true });
 }
 
 /* ==================== 规则 ==================== */
