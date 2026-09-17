@@ -315,8 +315,12 @@
   .card.hidden { visibility: hidden; }
   /* 两组花色必须一眼分开：红桃/方块走亮粉，黑桃/梅花走深紫。
      色相（粉 340° vs 紫 272°）和明度都拉开，压在粉紫桌布上也不会糊。 */
-  .card.red { color: #ff4f8b; }      /* 红桃 / 方块 → 亮玫粉 */
-  .card.black { color: #4a1d7a; }    /* 黑桃 / 梅花 → 深紫 */
+  /* 四个花色各用一种颜色，保证任何时候都能一眼看出是哪个花色。
+     色相均匀铺开：紫 265° / 玫红 337° / 金橙 38° / 墨青 175° */
+  .card.su0 { color: #4c1d95; }   /* ♠ 黑桃 · 深紫 */
+  .card.su1 { color: #ff3d7f; }   /* ♥ 红桃 · 玫红 */
+  .card.su2 { color: #f59e0b; }   /* ♦ 方块 · 金橙 */
+  .card.su3 { color: #0f766e; }   /* ♣ 梅花 · 墨青 */
 
   /* 矢量花色：用 mask 上色，跨平台形状统一、边缘锐利，不受系统字体影响 */
   .su-i {
@@ -575,6 +579,9 @@
 var SUITS = ["\u2660", "\u2665", "\u2666", "\u2663"];        // 0黑桃 1红桃 2方块 3梅花（仅用于文案）
 var SUIT_KEY = ["s", "h", "d", "c"];                        // 对应 CSS 里 .su-x 的矢量花色
 var IS_RED = [false, true, true, false];
+// 四花色配色，卡面 / 宫廷牌 / 拖拽层 / 收集区共用这一份
+var SUIT_COLOR = ["#4c1d95", "#ff3d7f", "#f59e0b", "#0f766e"];   // ♠ ♥ ♦ ♣
+var SUIT_COLOR_D = ["#331266", "#c41a56", "#b87407", "#0a544e"]; // 对应的深色版（描边/阴影）
 var RANK_TXT = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
 
 var PIP_LAYOUT = {
@@ -670,7 +677,7 @@ function cardEl(c) {
   var d = el("div", "card " + (c.up ? "up" : "down"));
   d.dataset.id = c.id;
   if (!c.up) return d;
-  d.classList.add(IS_RED[c.s] ? "red" : "black");
+  d.classList.add("su" + c.s);
   var f = el("div", "face");
   f.innerHTML = faceHTML(c.r, c.s);
   d.appendChild(f);
@@ -683,9 +690,9 @@ function suitIcon(suit, extraCls) {
 // J / Q / K 的宫廷人物（自绘几何风格，红衣=红色花色，蓝衣=黑色花色）
 function courtSVG(rank, suit) {
   var red = IS_RED[suit];
-  // 衣服配色和花色保持一致：红桃/方块=玫粉，黑桃/梅花=深紫
-  var cloth = red ? "#f0568f" : "#5b2a8c";
-  var clothD = red ? "#b81f5f" : "#3a1a63";
+  // 袍色跟着花色走，四个花色四种袍色，和卡面颜色一一对应
+  var cloth = SUIT_COLOR[suit];
+  var clothD = SUIT_COLOR_D[suit];
   var gold = "#e2b332", goldD = "#8c6a12";
   var skin = "#f4dcc2", hair = red ? "#8a5a34" : "#2a1b3d";
   var s = '<svg viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg">';
@@ -940,7 +947,7 @@ function renderColumn(ci, maxH) {
     var c = cards[k];
     var node = host.querySelector('[data-id="' + c.id + '"]');
     var cls = "card " + (c.up ? "up" : "down");
-    if (c.up) cls += IS_RED[c.s] ? " red" : " black";
+    if (c.up) cls += " su" + c.s;
     if (!node) {
       node = cardEl(c);
       host.appendChild(node);
@@ -987,7 +994,7 @@ function renderFoundations() {
     if (i < S.done.length) {
       var s = S.done[i];
       sl.classList.add("filled");
-      sl.innerHTML = '<div class="fi" style="color:' + (IS_RED[s] ? "#c62828" : "#16191d") + '">' +
+      sl.innerHTML = '<div class="fi" style="color:' + SUIT_COLOR[s] + '">' +
         '<span class="rk">K</span>' + suitIcon(s) + '</div>';
     } else {
       sl.classList.remove("filled");
