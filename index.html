@@ -529,13 +529,15 @@
     background: linear-gradient(135deg, #ff8fc6, #c9a0ff);
     box-shadow: 0 6px 20px rgba(196,58,136,.42), inset 0 1px 0 rgba(255,255,255,.4);
     text-shadow: 0 1px 2px rgba(150,30,100,.35);
-    animation: cheerPop 1.5s cubic-bezier(.22,1.5,.4,1) both;
+    animation: cheerPop 2.15s cubic-bezier(.22,1.5,.4,1) both;
   }
+  /* 出场 0→0.5s，平稳停留到 1.7s 方便读完，最后 0.45s 上浮淡出 */
   @keyframes cheerPop {
-    0%   { transform: translate(-50%, 4px) scale(.45); opacity: 0; }
-    20%  { transform: translate(-50%, -12px) scale(1.1); opacity: 1; }
-    34%  { transform: translate(-50%, -16px) scale(1); }
-    100% { transform: translate(-50%, -68px) scale(.9); opacity: 0; }
+    0%   { transform: translate(-50%, 6px) scale(.5); opacity: 0; }
+    14%  { transform: translate(-50%, -12px) scale(1.08); opacity: 1; }
+    24%  { transform: translate(-50%, -16px) scale(1); }
+    78%  { transform: translate(-50%, -21px) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -80px) scale(.92); opacity: 0; }
   }
   .cheer.soft {
     background: linear-gradient(135deg, #b9a6e8, #8fa8e8);
@@ -1295,7 +1297,7 @@ function collectRuns(silent) {
       var rect = host.getBoundingClientRect();
       floatText("+" + (found.length * 100), rect.left + rect.width / 2, rect.top);
       // 每成交一组就冒一句可爱的话
-      cheer(pickOne(CHEER_GROUP), rect.left + rect.width / 2, rect.top - 30);
+      cheer(pickOne(CHEER_GROUP, "g"), rect.left + rect.width / 2, rect.top - 34);
     }
     render();   // 自身保证 UI 同步
     updateStats();
@@ -1348,17 +1350,41 @@ function flyToSlot(fromRect, suit, slotIdx) {
 /* ==================== 可爱的反馈 ==================== */
 var CHEER_GROUP = [
   "好棒！", "又成一组 ♪", "厉害呀～", "可以可以！",
-  "进展神速！", "漂亮！", "稳稳的 ♪", "干得好！"
+  "进展神速！", "漂亮！", "稳稳的 ♪", "干得好！",
+  "太顺了吧！", "收下这组！", "掌声送给你 ♪", "手感真好！",
+  "这波漂亮！", "又清一组 ✨", "越来越顺了～", "继续继续！",
+  "好耶！", "一鼓作气！", "这组稳了 ♪", "你太行了！",
+  "节奏起来了～", "顺风顺水！", "给力！", "就喜欢看你这样打！",
+  "这套收得干净利落！", "再来一组 ♪", "丝滑！", "不愧是你！"
 ];
 var CHEER_WIN = [
-  "通关啦！你超厉害！", "完美收工 ♪", "全清！太强了！", "八组全收，膜拜！"
+  "通关啦！你超厉害！", "完美收工 ♪", "全清！太强了！", "八组全收，膜拜！",
+  "无懈可击！", "这就是实力吧 ✨", "一把清空，好爽！", "大获全胜 ♪",
+  "零失误的表演！", "太顶了！", "通关如喝水～", "这局打得真漂亮！",
+  "全收了！掌声鼓励 ♪", "你已经是蜘蛛大师了！"
 ];
 var CHEER_LOSE = [
   "没关系，再来一局就好啦～", "差一点点呢，别灰心！",
-  "这局牌运不太好，下一把一定行！", "摸摸头，再来一次吧 ♪"
+  "这局牌运不太好，下一把一定行！", "摸摸头，再来一次吧 ♪",
+  "别气馁，胜败乃兵家常事～", "这局是牌不听话，不怪你！",
+  "歇口气，再来一局？", "已经很接近了呀～",
+  "下一把一定翻盘！", "输赢都是游戏，开心最重要 ♪",
+  "这局有点难，不是你的问题！", "抖擞精神，重新来过～",
+  "牌堆欠你一个道歉 ♪", "下次一定！"
 ];
 
-function pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+// 上一个抽到的文案，避免连着两次一样
+var _lastPick = {};
+function pickOne(arr, key) {
+  if (!arr || !arr.length) return "";
+  if (arr.length === 1) return arr[0];
+  var v, tries = 0;
+  do {
+    v = arr[Math.floor(Math.random() * arr.length)];
+  } while (v === _lastPick[key] && ++tries < 16);
+  if (key) _lastPick[key] = v;
+  return v;
+}
 
 /** 冒一个可爱的气泡，1.5 秒后自己消失 */
 function cheer(txt, x, y, soft) {
@@ -1367,7 +1393,7 @@ function cheer(txt, x, y, soft) {
   d.style.left = x + "px";
   d.style.top = y + "px";
   document.body.appendChild(d);
-  setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1560);
+  setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 2200);
 }
 
 function floatText(txt, x, y) {
@@ -1549,6 +1575,7 @@ function moveRun(fromCol, fromIdx, toCol) {
   var cards = S.cols[fromCol].slice(fromIdx);
   var head = cards[0];
   if (!canDrop(head, toCol)) return false;
+  clearHints();     // 提示高亮在列容器上，不随牌面重绘消失，这里主动清掉
   pushUndo();
   S.cols[fromCol].splice(fromIdx, cards.length);
   for (var i = 0; i < cards.length; i++) S.cols[toCol].push(cards[i]);
@@ -1951,7 +1978,7 @@ function win() {
   $("winTitle").textContent = "通关啦～ 好厉害！";
   $("btnClose").textContent = "看看牌桌";
   $("overlay").classList.remove("lose");   // 上一局若是输的，这里要把紫色面板换回粉红
-  cheer(pickOne(CHEER_WIN), window.innerWidth / 2, Math.max(120, window.innerHeight * 0.3));
+  cheer(pickOne(CHEER_WIN, "w"), window.innerWidth / 2, Math.max(120, window.innerHeight * 0.3));
   setTimeout(function () { $("overlay").classList.add("show"); }, 500);
 }
 
@@ -1980,7 +2007,7 @@ function lose() {
   $("btnClose").textContent = "再看看牌桌";
   $("overlay").classList.add("lose");
 
-  cheer(pickOne(CHEER_LOSE), window.innerWidth / 2, Math.max(120, window.innerHeight * 0.3), true);
+  cheer(pickOne(CHEER_LOSE, "l"), window.innerWidth / 2, Math.max(120, window.innerHeight * 0.3), true);
   setTimeout(function () { $("overlay").classList.add("show"); }, 760);
 }
 
@@ -2069,7 +2096,11 @@ window.__spider = {
   isRun: isRun,
   canDrop: canDrop,
   collectRuns: collectRuns,
-  cheer: cheer
+  cheer: cheer,
+  showHint: showHint,
+  clearHints: clearHints,
+  doUndo: doUndo,
+  pickRemaining: pickRemaining
 };
 
 })();
