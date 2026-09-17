@@ -438,6 +438,11 @@
   .card.su2 { color: #f59e0b; }   /* ♦ 方块 · 金橙 */
   .card.su3 { color: #0f766e; }   /* ♣ 梅花 · 墨青 */
 
+  /* 1 花色：整副牌都是黑桃，没有区分花色的必要，直接给主题粉红 */
+  body.solo .card.su0 { color: #ff5fa8; }
+  /* 1 花色时收进收集槽的牌也跟着变粉 */
+  body.solo .card.su0.ghostfly { color: #ff5fa8; }
+
   /* 矢量花色：用 mask 上色，跨平台形状统一、边缘锐利，不受系统字体影响 */
   .su-i {
     display: block;
@@ -812,9 +817,10 @@ function suitIcon(suit, extraCls) {
 // J / Q / K 的宫廷人物（自绘几何风格，红衣=红色花色，蓝衣=黑色花色）
 function courtSVG(rank, suit) {
   var red = IS_RED[suit];
-  // 袍色跟着花色走，四个花色四种袍色，和卡面颜色一一对应
-  var cloth = SUIT_COLOR[suit];
-  var clothD = SUIT_COLOR_D[suit];
+  // 袍色跟着花色走；1 花色时整副牌都是黑桃，直接用主题粉
+  var solo = S.suitCount === 1;
+  var cloth = solo ? "#ff5fa8" : SUIT_COLOR[suit];
+  var clothD = solo ? "#c41a56" : SUIT_COLOR_D[suit];
   var gold = "#e2b332", goldD = "#8c6a12";
   var skin = "#f4dcc2", hair = red ? "#8a5a34" : "#2a1b3d";
   var s = '<svg viewBox="0 0 100 88" xmlns="http://www.w3.org/2000/svg">';
@@ -946,6 +952,8 @@ function relayout() {
 /* ==================== 发牌 / 开局 ==================== */
 function newGame(suitCount) {
   if (suitCount) S.suitCount = suitCount;
+  // 1 花色整副牌都是黑桃，标记出来让卡面 / 袍色 / 收集区统一走主题粉
+  document.body.classList.toggle("solo", S.suitCount === 1);
   var suits = S.suitCount === 1 ? [0] : (S.suitCount === 2 ? [0, 1] : [0, 1, 2, 3]);
   var repeats = 8 / suits.length;
   var deck = [];
@@ -1116,7 +1124,8 @@ function renderFoundations() {
     if (i < S.done.length) {
       var s = S.done[i];
       sl.classList.add("filled");
-      sl.innerHTML = '<div class="fi" style="color:' + SUIT_COLOR[s] + '">' +
+      var fiColor = S.suitCount === 1 ? "#ff5fa8" : SUIT_COLOR[s];
+      sl.innerHTML = '<div class="fi" style="color:' + fiColor + '">' +
         '<span class="rk">K</span>' + suitIcon(s) + '</div>';
     } else {
       sl.classList.remove("filled");
