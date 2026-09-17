@@ -582,6 +582,44 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* 胜利 */
+  /* ---------- 主题化确认框 ---------- */
+  .cfm-mask {
+    position: fixed; inset: 0; z-index: 9900;
+    display: grid; place-items: center;
+    background: rgba(58,0,30,.6);
+    backdrop-filter: blur(9px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .26s ease;
+  }
+  .cfm-mask.show { opacity: 1; pointer-events: auto; }
+  .cfm-box {
+    width: min(330px, 87vw);
+    padding: 24px 22px 18px;
+    border-radius: 22px;
+    text-align: center;
+    background: linear-gradient(168deg, #cc4e92 0%, #a33070 55%, #7d2154 100%);
+    border: 1px solid rgba(255,255,255,.22);
+    box-shadow:
+      0 24px 60px rgba(52,0,28,.55),
+      0 2px 8px rgba(52,0,28,.3),
+      inset 0 1px 0 rgba(255,255,255,.18);
+    transform: scale(.92) translateY(12px);
+    transition: transform .44s cubic-bezier(.32,.72,0,1);
+  }
+  .cfm-mask.show .cfm-box { transform: scale(1) translateY(0); }
+  .cfm-ico {
+    width: 46px; height: 46px; margin: 0 auto 12px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 22px; color: #fff;
+    background: linear-gradient(150deg, #ffd6ea, #f58cc6);
+    box-shadow: 0 6px 18px rgba(120,10,66,.4), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .cfm-title { font-size: 16.5px; font-weight: 800; color: #fff; letter-spacing: .3px; }
+  .cfm-sub { font-size: 12.5px; color: #ffd9ec; margin-top: 6px; line-height: 1.55; }
+  .cfm-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .cfm-actions .btn { flex: 1 1 0; justify-content: center; padding: 9px 0; }
+
   .overlay {
     position: fixed; inset: 0; z-index: 9800;
     display: grid; place-items: center;
@@ -727,6 +765,19 @@
 <div id="dragLayer"></div>
 <div id="petals" aria-hidden="true"></div>
 <div class="toast" id="toast"></div>
+
+<!-- 主题化确认弹窗（替代浏览器原生 confirm） -->
+<div class="cfm-mask" id="cfmMask">
+  <div class="cfm-box">
+    <div class="cfm-ico">♠</div>
+    <div class="cfm-title" id="cfmTitle"></div>
+    <div class="cfm-sub" id="cfmSub"></div>
+    <div class="cfm-actions">
+      <button class="btn" id="cfmCancel">再想想</button>
+      <button class="btn primary" id="cfmOk">确定</button>
+    </div>
+  </div>
+</div>
 
 <div class="overlay" id="overlay">
   <div class="panel">
@@ -1045,6 +1096,27 @@ function newGame(suitCount) {
   startTimer();
   updateStats();
   toast("新局开始 · " + S.suitCount + " 花色");
+}
+
+/* ==================== 主题化确认框 ==================== */
+var _cfmResolve = null;
+
+/** 替掉浏览器原生 confirm：返回 Promise<boolean> */
+function askConfirm(title, sub) {
+  return new Promise(function (resolve) {
+    _cfmResolve = resolve;
+    $("cfmTitle").textContent = title;
+    $("cfmSub").textContent = sub || "";
+    $("cfmMask").classList.add("show");
+    setTimeout(function () { $("cfmOk").focus(); }, 60);
+  });
+}
+
+function closeConfirm(val) {
+  $("cfmMask").classList.remove("show");
+  var r = _cfmResolve;
+  _cfmResolve = null;
+  if (r) r(val);
 }
 
 function startTimer() {
@@ -1650,11 +1722,19 @@ function bindEvents() {
   window.addEventListener("pointercancel", onUp);
 
   $("stockpile").addEventListener("click", dealStock);
-  $("btnNew").addEventListener("click", function () {
+  $("btnNew").addEventListener("click", async function () {
     if (S.moves > 0 && !S.over) {
-      if (!confirm("当前进度会丢失，确定开新局吗？")) return;
+      var okNew = await askConfirm("确定要开新局吗？", "当前进度会丢失哦～");
+      if (!okNew) return;
     }
     newGame();
+  });
+
+  // 确认框按钮
+  $("cfmOk").addEventListener("click", function () { closeConfirm(true); });
+  $("cfmCancel").addEventListener("click", function () { closeConfirm(false); });
+  $("cfmMask").addEventListener("click", function (e) {
+    if (e.target === this) closeConfirm(false);   // 点遮罩 = 取消
   });
   $("btnUndo").addEventListener("click", doUndo);
   $("btnHint").addEventListener("click", showHint);
@@ -1666,21 +1746,31 @@ function bindEvents() {
   $("btnAgain").addEventListener("click", function () { newGame(); });
   $("btnClose").addEventListener("click", function () { $("overlay").classList.remove("show"); });
 
-  $("segDiff").addEventListener("click", function (e) {
+  $("segDiff").addEventListener("click", async function (e) {
+    var segEl = this;
     var b = e.target.closest("button");
     if (!b) return;
     var s = parseInt(b.dataset.s, 10);
     if (s === S.suitCount && S.moves === 0) return;
-    if (S.moves > 0 && !S.over && !confirm("切换难度会重开一局，继续吗？")) return;
-    Array.prototype.forEach.call(this.children, function (x) { x.classList.remove("on"); });
+    if (S.moves > 0 && !S.over) {
+      var okDiff = await askConfirm("切换难度会重开一局", "当前进度会丢失，继续吗？");
+      if (!okDiff) return;
+    }
+    Array.prototype.forEach.call(segEl.children, function (x) { x.classList.remove("on"); });
     b.classList.add("on");
     newGame(s);
   });
 
   document.addEventListener("keydown", function (e) {
+    // 确认框打开时：Esc 取消，其余快捷键一律屏蔽，避免误操作
+    if ($("cfmMask").classList.contains("show")) {
+      if (e.key === "Escape") { e.preventDefault(); closeConfirm(false); }
+      return;
+    }
     if (e.ctrlKey && e.key.toLowerCase() === "z") { e.preventDefault(); doUndo(); }
     else if (e.key.toLowerCase() === "h") { showHint(); }
-    else if (e.key.toLowerCase() === "n") { newGame(); }
+    // N 也走按钮那条路，这样同样会先弹确认框（原来直接重开，会丢进度）
+    else if (e.key.toLowerCase() === "n") { $("btnNew").click(); }
     else if (e.key === " ") { e.preventDefault(); dealStock(); }
   });
 
