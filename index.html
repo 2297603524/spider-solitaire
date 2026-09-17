@@ -136,9 +136,15 @@
   button.btn:active { transform: translateY(1px); }
   button.btn[disabled] { opacity: .34; cursor: default; transform: none; }
   /* 按钮按下有回弹手感 */
-  button.btn { transition: transform .13s cubic-bezier(.3,1.4,.5,1), background .18s, box-shadow .18s, opacity .18s; }
+  /* iOS 手感：按下要「立刻」有反馈（60ms），抬起再平滑回弹（200ms 长尾） */
+  button.btn {
+    transition:
+      transform .2s cubic-bezier(.32,.72,0,1),
+      background .18s ease, border-color .18s ease,
+      box-shadow .18s ease, opacity .18s ease;
+  }
   button.btn:hover:not([disabled]) { transform: translateY(-1.5px); }
-  button.btn:active:not([disabled]) { transform: translateY(0) scale(.965); }
+  button.btn:active:not([disabled]) { transform: scale(.955); transition-duration: .06s, .18s, .18s, .18s, .18s; }
 
   /* 可放置的列：呼吸光提示 */
   .col.drop-ok { animation: dropPulse 1.05s ease-in-out infinite; }
@@ -331,13 +337,16 @@
     border-radius: calc(var(--cw) * .08);
     background: #fffafc;            /* 极淡粉白 */
     overflow: hidden;
-    transition: top .17s cubic-bezier(.3,.7,.35,1), box-shadow .15s;
-    /* 柔和投影 + 内描边（外描边和 1px 硬阴影会在牌堆叠时形成一排灰线） */
+    /* 位置变化一律交给 transform 飞行动画（GPU 合成），这里绝不过渡 top：
+       top 属于布局属性，过渡它会每帧触发布局重排，是掉帧的根源。 */
+    transition: box-shadow .2s ease, filter .2s ease;
+    /* 三层渐进阴影：近处紧、中距实、远处散，比单层重阴影自然得多 */
     box-shadow:
-      0 3px 10px rgba(150,40,110,.18),
-      0 1px 2px rgba(150,40,110,.10),
-      inset 0 0 0 1px rgba(214,110,175,.16);
-    will-change: top;
+      0 1px 1px rgba(122,26,80,.10),
+      0 2px 5px rgba(122,26,80,.09),
+      0 6px 14px rgba(122,26,80,.08),
+      inset 0 0 0 1px rgba(214,110,175,.14);
+    will-change: transform;
     /* 关键：把每张牌做成独立的层叠上下文。
        否则牌内部伪元素的 z-index 会逃到整张牌桌上，把背面牌的暗边画到上面的正面牌脸上 */
     isolation: isolate;
@@ -386,7 +395,7 @@
   .card.deal {
     transition: none;
     z-index: 80;
-    animation: cardDeal .46s cubic-bezier(.18,.92,.28,1) both;
+    animation: cardDeal .44s cubic-bezier(.22,1.02,.36,1) both;   /* iOS 入场：轻回弹 */
   }
   @keyframes cardDeal {
     0%   { transform: translate3d(var(--dx, 0px), var(--dy, -40px), 0) rotate(-12deg) scale(.84); opacity: 0; }
@@ -399,7 +408,8 @@
   .card.fly {
     transition: none;
     z-index: 80;
-    animation: cardFly .34s cubic-bezier(.2,.88,.3,1) both;
+    /* iOS 13+ 模态面板曲线：起步快、尾巴长，是「丝滑」的来源 */
+    animation: cardFly .4s cubic-bezier(.32,.72,0,1) both;
   }
   @keyframes cardFly {
     0%   { transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0) scale(1.05); }
@@ -411,7 +421,7 @@
     transition: none;
     z-index: 90;
     pointer-events: none;
-    animation: cardCollect .38s cubic-bezier(.3,.85,.35,1) both;
+    animation: cardCollect .42s cubic-bezier(.32,.72,0,1) both;
   }
   @keyframes cardCollect {
     0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
@@ -419,7 +429,7 @@
   }
 
   /* 翻牌：轻微下压 + 回弹 */
-  .card.flip-in { animation: cardFlipIn .26s cubic-bezier(.3,1.4,.5,1) both; }
+  .card.flip-in { animation: cardFlipIn .28s cubic-bezier(.34,1.5,.64,1) both; }
   @keyframes cardFlipIn {
     0%   { transform: scale(.94) rotateY(-16deg); }
     100% { transform: scale(1) rotateY(0deg); }
@@ -550,7 +560,7 @@
     position: fixed; z-index: 9500; pointer-events: none;
     font-weight: 900; font-size: 17px; color: #ffe14d;
     text-shadow: 0 2px 8px rgba(0,0,0,.7);
-    animation: floatUp 1s cubic-bezier(.2,.9,.3,1) forwards;
+    animation: floatUp 1.1s cubic-bezier(.22,1.05,.36,1) forwards;
   }
   @keyframes floatUp {
     0% { opacity: 0; transform: translate(-50%,0) scale(.7); }
@@ -565,7 +575,8 @@
     border: 1px solid rgba(255,255,255,.18);
     padding: 9px 18px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
     box-shadow: 0 8px 26px rgba(0,0,0,.45);
-    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+    opacity: 0; pointer-events: none;
+    transition: opacity .26s ease, transform .36s cubic-bezier(.32,.72,0,1);
     z-index: 9600; white-space: nowrap; max-width: 92vw; overflow: hidden; text-overflow: ellipsis;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -586,9 +597,11 @@
     border-radius: 20px; padding: 30px 28px 24px;
     text-align: center;
     box-shadow: 0 26px 70px rgba(0,0,0,.6);
-    transform: scale(.9); transition: transform .4s cubic-bezier(.2,1.4,.4,1);
+    /* iOS 面板手感：从下方微升 + 轻微放大，配长尾减速 */
+    transform: scale(.92) translateY(10px);
+    transition: transform .48s cubic-bezier(.32,.72,0,1);
   }
-  .overlay.show .panel { transform: scale(1); }
+  .overlay.show .panel { transform: scale(1) translateY(0); }
   /* 死局：面板换成柔和的紫，头像降一点饱和，语气软下来 */
   .overlay.lose .panel { background: linear-gradient(170deg, #8a63c8, #4a2f7a); }
   .overlay.lose .win-avatar {
@@ -604,7 +617,7 @@
     border-radius: 50%;
     background: linear-gradient(140deg, #ffe3f1, #f58cc6, #c9a8ff);
     box-shadow: 0 10px 28px rgba(190,60,140,.45), 0 0 0 6px rgba(255,255,255,.14);
-    animation: avatarPop .65s cubic-bezier(.2,1.6,.4,1) both;
+    animation: avatarPop .62s cubic-bezier(.34,1.5,.64,1) both;
   }
   .win-avatar img {
     width: 100%; height: 100%; border-radius: 50%;
@@ -1883,7 +1896,10 @@ function tryAutoToEmpty(emptyCol) {
       if (!col[i].up) continue;
       if (!isRun(col, i)) continue;
       if (col[i].r === 13 && i > 0) {   // 整段 K 开头的搬到空列
+        var tIds = S.cols[c].slice(i).map(function (x) { return x.id; });
+        var tBefore = snapshotCards(tIds);
         moveRun(c, i, emptyCol);
+        flyCardsById(tIds, tBefore, "fly");
         return;
       }
     }
