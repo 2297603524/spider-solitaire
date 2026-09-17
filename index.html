@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#133a29" />
+<meta name="theme-color" content="#241a56" />
 <meta name="format-detection" content="telephone=no,email=no,address=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -32,16 +32,16 @@
     display: flex;
     flex-direction: column;
     font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
-    /* 底层插画 + 半透明粉紫渐变覆盖（保证卡牌依然清晰可读） */
-    background-color: #dd8ec6;
+    /* 底层二次元夜景插画 + 半透明靛紫渐变覆盖（保证卡牌依然清晰可读） */
+    background-color: #2a2154;
     background-image:
-      radial-gradient(52% 36% at 10% 6%, rgba(255,255,255,.40), transparent 62%),
-      radial-gradient(44% 30% at 90% 12%, rgba(198,160,255,.34), transparent 64%),
+      radial-gradient(52% 36% at 10% 6%, rgba(160,220,255,.20), transparent 62%),
+      radial-gradient(44% 30% at 90% 12%, rgba(255,170,230,.22), transparent 64%),
       linear-gradient(155deg,
-        rgba(242,170,218,.74) 0%,
-        rgba(226,146,202,.66) 38%,
-        rgba(203,146,226,.68) 72%,
-        rgba(185,149,234,.76) 100%),
+        rgba(38,20,96,.62) 0%,
+        rgba(52,26,120,.56) 38%,
+        rgba(88,32,146,.58) 72%,
+        rgba(132,40,156,.64) 100%),
       url("art/bg-art.jpg");
     background-size: auto, auto, auto, cover;
     background-position: 0 0, 0 0, 0 0, center 22%;
@@ -82,7 +82,7 @@
   /* 轻微暗角，把视线收在牌桌中间 */
   body::before {
     content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-    background: radial-gradient(132% 106% at 50% -6%, transparent 66%, rgba(76,0,38,.26) 100%);
+    background: radial-gradient(132% 106% at 50% -6%, transparent 64%, rgba(8,2,34,.4) 100%);
   }
   :root {
     --cw: 84px;
@@ -91,8 +91,8 @@
     --up: 30px;
     --down: 17px;
     --fs: .62;          /* 收集槽 / 发牌堆相对卡牌的缩放 */
-    /* 深红古典回纹牌背，牌堆和发牌堆共用同一个图案 */
-    --back-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' fill='%23c2185b'/%3E%3Cpath d='M14 3.5L24.5 14L14 24.5L3.5 14Z' fill='none' stroke='%23f9c1da' stroke-width='.9'/%3E%3Cpath d='M14 8.6L19.4 14L14 19.4L8.6 14Z' fill='none' stroke='%23f9c1da' stroke-width='.7'/%3E%3Ccircle cx='14' cy='14' r='1.5' fill='%23f9c1da'/%3E%3C/svg%3E");
+    /* 二次元星空牌背：靛蓝底 + 四角星光 + 碎星，牌堆和发牌堆共用同一个图案 */
+    --back-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect width='28' height='28' fill='%2346309b'/%3E%3Cpath d='M14 6.5L15.4 12.6L21.5 14L15.4 15.4L14 21.5L12.6 15.4L6.5 14L12.6 12.6Z' fill='%23ffe9a8'/%3E%3Cpath d='M23 3.5L23.7 5.8L26 6.5L23.7 7.2L23 9.5L22.3 7.2L20 6.5L22.3 5.8Z' fill='%239ef3ff'/%3E%3Cpath d='M5 19.5L5.6 21.4L7.5 22L5.6 22.6L5 24.5L4.4 22.6L2.5 22L4.4 21.4Z' fill='%23ffd6ec'/%3E%3Ccircle cx='24.5' cy='21' r='1.1' fill='%23ffffff' opacity='.85'/%3E%3Ccircle cx='4' cy='8.5' r='.9' fill='%23ffffff' opacity='.75'/%3E%3Ccircle cx='19.5' cy='24.5' r='.7' fill='%23ffe9a8' opacity='.8'/%3E%3C/svg%3E");
   }
 
   /* ---------------- 顶栏 ---------------- */
@@ -101,14 +101,15 @@
     flex: 0 0 auto;
     display: flex; align-items: center; gap: 8px;
     padding: 8px 14px;
-    background: linear-gradient(180deg, rgba(80,6,44,.62), rgba(80,6,44,.26));
+    background: linear-gradient(180deg, rgba(26,14,60,.68), rgba(26,14,60,.32));
     border-bottom: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 6px 20px rgba(58,2,32,.26);
+    box-shadow: 0 6px 20px rgba(10,4,36,.4);
     backdrop-filter: blur(10px);
     flex-wrap: wrap;
   }
   .brand {
     display: flex; align-items: center; gap: 9px;
+    font-family: "Yuanti SC", "YouYuan", "幼圆", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-weight: 800; letter-spacing: .5px; font-size: 15px;
     margin-right: 4px; white-space: nowrap;
     text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -161,29 +162,29 @@
     100% { transform: scale(1); }
   }
   button.btn.primary {
-    background: linear-gradient(180deg,#f068ab,#ca3980);
-    border-color: rgba(255,255,255,.34);
-    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    background: linear-gradient(180deg,#ff6fb5,#e33f92);
+    border-color: rgba(255,255,255,.38);
+    box-shadow: 0 2px 10px rgba(233,63,146,.45);
   }
-  button.btn.primary:hover { background: linear-gradient(180deg,#f87cba,#d8488e); }
+  button.btn.primary:hover { background: linear-gradient(180deg,#ff8ac6,#ea559f); }
 
-  .seg { display: inline-flex; background: rgba(0,0,0,.26); border-radius: 10px; padding: 3px; border: 1px solid rgba(255,255,255,.13); }
+  .seg { display: inline-flex; background: rgba(10,4,40,.42); border-radius: 10px; padding: 3px; border: 1px solid rgba(255,255,255,.13); }
   .seg button {
     appearance: none; border: 0; background: transparent; color: #cfe4d8;
     font: inherit; font-size: 12.5px; font-weight: 700; padding: 5px 12px;
     border-radius: 7px; cursor: pointer; transition: background .15s, color .15s;
   }
-  .seg button.on { background: rgba(255,255,255,.95); color: #a5236b; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .seg button.on { background: rgba(255,255,255,.95); color: #7b2fa8; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
   .seg button:not(.on):hover { color: #fff; background: rgba(255,255,255,.09); }
 
   /* 统计做成一个胶囊卡片，三项之间用细分隔线，比三个数字裸着排更有整体感 */
   .stats {
     display: flex; align-items: stretch;
-    background: rgba(46,2,26,.34);
+    background: rgba(18,8,50,.44);
     border: 1px solid rgba(255,255,255,.12);
     border-radius: 12px;
     padding: 4px 3px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 8px rgba(70,4,38,.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 8px rgba(10,4,40,.3);
   }
   .stat {
     position: relative;
@@ -225,12 +226,12 @@
     display: flex; gap: 7px;
     padding: 7px 9px;
     border-radius: 15px;
-    background: linear-gradient(180deg, rgba(64,4,36,.46), rgba(64,4,36,.30));
+    background: linear-gradient(180deg, rgba(22,10,58,.5), rgba(22,10,58,.32));
     border: 1px solid rgba(255,255,255,.14);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.10),
-      inset 0 -1px 0 rgba(0,0,0,.14),
-      0 4px 16px rgba(64,4,36,.22);
+      inset 0 -1px 0 rgba(0,0,0,.2),
+      0 4px 16px rgba(8,2,40,.4);
     backdrop-filter: blur(8px);
   }
   .fslot {
@@ -238,7 +239,7 @@
     border-radius: calc(var(--cw) * .07);
     border: 1.5px dashed rgba(255,255,255,.30);
     background: rgba(255,255,255,.08);
-    box-shadow: inset 0 1px 4px rgba(74,6,42,.20);
+    box-shadow: inset 0 1px 4px rgba(10,4,44,.3);
     display: grid; place-items: center;
     font-size: calc(var(--cw) * .25); line-height: 1;
     position: relative; overflow: hidden;
@@ -261,7 +262,7 @@
   .stockpile .sp {
     position: absolute; top: 0; width: calc(var(--cw) * var(--fs)); height: calc(var(--ch) * var(--fs));
     border-radius: calc(var(--cw) * .07);
-    background-color: #c2185b;
+    background-color: #46309b;
     background-image: var(--back-pattern);
     background-size: 21% auto;
     box-shadow: 0 1px 0 rgba(0,0,0,.22), 0 2px 4px rgba(0,0,0,.26), 0 0 0 1px rgba(0,0,0,.12);
@@ -272,7 +273,7 @@
     border-radius: calc(var(--cw) * .03);
     box-shadow:
       inset 0 0 0 1.5px rgba(255,255,255,.82),
-      inset 0 0 0 3.5px rgba(112,10,58,.5),
+      inset 0 0 0 3.5px rgba(28,14,86,.55),
       inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
   .stockpile:hover .sp { transform: translateY(-3px); }
@@ -291,7 +292,7 @@
   .stocklabel {
     font-size: 11px; color: #ffe6f4; font-weight: 700; letter-spacing: .4px;
     white-space: nowrap;
-    background: rgba(74,6,42,.34);
+    background: rgba(24,10,64,.44);
     border: 1px solid rgba(255,255,255,.13);
     border-radius: 999px;
     padding: 5px 11px;
@@ -323,8 +324,8 @@
     content: ""; position: absolute; top: 0; left: 0; width: 100%; height: var(--ch);
     border-radius: calc(var(--cw) * .08);
     border: 1.5px solid rgba(255,255,255,.30);
-    background: rgba(98,0,48,.18);
-    box-shadow: inset 0 1px 4px rgba(98,0,48,.24);
+    background: rgba(16,6,54,.34);
+    box-shadow: inset 0 1px 4px rgba(10,2,48,.4);
   }
   .col.drop-ok { background: rgba(255,255,255,.13); box-shadow: inset 0 0 0 2px rgba(255,255,255,.42); }
   .col.drop-no { background: rgba(220,60,50,.14); box-shadow: inset 0 0 0 2px rgba(230,90,80,.5); }
@@ -342,10 +343,10 @@
     transition: box-shadow .2s ease, filter .2s ease;
     /* 三层渐进阴影：近处紧、中距实、远处散，比单层重阴影自然得多 */
     box-shadow:
-      0 1px 1px rgba(122,26,80,.10),
-      0 2px 5px rgba(122,26,80,.09),
-      0 6px 14px rgba(122,26,80,.08),
-      inset 0 0 0 1px rgba(214,110,175,.14);
+      0 1px 1px rgba(24,10,70,.12),
+      0 2px 5px rgba(24,10,70,.10),
+      0 6px 14px rgba(24,10,70,.10),
+      inset 0 0 0 1px rgba(150,120,255,.16);
     will-change: transform;
     /* 关键：把每张牌做成独立的层叠上下文。
        否则牌内部伪元素的 z-index 会逃到整张牌桌上，把背面牌的暗边画到上面的正面牌脸上 */
@@ -353,7 +354,7 @@
   }
   /* 深红古典回纹牌背 */
   .card.down {
-    background-color: #c2185b;
+    background-color: #46309b;
     background-image: var(--back-pattern);
     background-size: 21% auto;
     box-shadow:
@@ -372,7 +373,7 @@
     border-radius: calc(var(--cw) * .03);
     box-shadow:
       inset 0 0 0 1.5px rgba(255,255,255,.82),
-      inset 0 0 0 3.5px rgba(112,10,58,.5),
+      inset 0 0 0 3.5px rgba(28,14,86,.55),
       inset 0 0 0 4.5px rgba(255,255,255,.5);
   }
   /* 正面牌顶部的柔光，像覆了一层玻璃 */
@@ -439,14 +440,12 @@
     box-shadow: 0 10px 24px rgba(0,0,0,.42), 0 2px 6px rgba(0,0,0,.28), inset 0 0 0 1px rgba(0,0,0,.1);
   }
   .card.hidden { visibility: hidden; }
-  /* 两组花色必须一眼分开：红桃/方块走亮粉，黑桃/梅花走深紫。
-     色相（粉 340° vs 紫 272°）和明度都拉开，压在粉紫桌布上也不会糊。 */
   /* 四个花色各用一种颜色，保证任何时候都能一眼看出是哪个花色。
-     色相均匀铺开：紫 265° / 玫红 337° / 金橙 38° / 墨青 175° */
-  .card.su0 { color: #4c1d95; }   /* ♠ 黑桃 · 深紫 */
-  .card.su1 { color: #ff3d7f; }   /* ♥ 红桃 · 玫红 */
-  .card.su2 { color: #f59e0b; }   /* ♦ 方块 · 金橙 */
-  .card.su3 { color: #0f766e; }   /* ♣ 梅花 · 墨青 */
+     色相均匀铺开：星紫 262° / 霓虹粉 337° / 暖金 38° / 青碧 174° */
+  .card.su0 { color: #5b21b6; }   /* ♠ 黑桃 · 星紫 */
+  .card.su1 { color: #ff3d7f; }   /* ♥ 红桃 · 霓虹粉 */
+  .card.su2 { color: #f59e0b; }   /* ♦ 方块 · 暖金 */
+  .card.su3 { color: #0d9488; }   /* ♣ 梅花 · 青碧 */
 
   /* 1 花色：整副牌都是黑桃，没有区分花色的必要，直接给主题粉红 */
   body.solo .card.su0 { color: #ff5fa8; }
@@ -523,7 +522,7 @@
   /* 收进收集槽的临时飞牌 */
   #dragLayer .card.ghostfly {
     position: absolute; transform-origin: 0 0;
-    box-shadow: 0 6px 20px rgba(150,40,110,.35);
+    box-shadow: 0 6px 20px rgba(120,60,220,.45);
     transition: transform .46s cubic-bezier(.32,.86,.34,1), opacity .46s ease-in !important;
   }
 
@@ -568,7 +567,7 @@
   /* 提示条 */
   .toast {
     position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(16px);
-    background: rgba(76,4,42,.94); color: #fdeaf4;
+    background: rgba(24,10,60,.94); color: #f1eaff;
     border: 1px solid rgba(255,255,255,.18);
     padding: 9px 18px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
     box-shadow: 0 8px 26px rgba(0,0,0,.45);
@@ -583,7 +582,7 @@
   .cfm-mask {
     position: fixed; inset: 0; z-index: 9900;
     display: grid; place-items: center;
-    background: rgba(58,0,30,.6);
+    background: rgba(14,6,40,.66);
     backdrop-filter: blur(9px);
     opacity: 0; pointer-events: none;
     transition: opacity .26s ease;
@@ -594,11 +593,11 @@
     padding: 24px 22px 18px;
     border-radius: 22px;
     text-align: center;
-    background: linear-gradient(168deg, #cc4e92 0%, #a33070 55%, #7d2154 100%);
+    background: linear-gradient(168deg, #5b3fb8 0%, #3d2a8f 55%, #2a1c66 100%);
     border: 1px solid rgba(255,255,255,.22);
     box-shadow:
-      0 24px 60px rgba(52,0,28,.55),
-      0 2px 8px rgba(52,0,28,.3),
+      0 24px 60px rgba(6,0,30,.6),
+      0 2px 8px rgba(6,0,30,.35),
       inset 0 1px 0 rgba(255,255,255,.18);
     transform: scale(.92) translateY(12px);
     transition: transform .44s cubic-bezier(.32,.72,0,1);
@@ -610,9 +609,9 @@
     display: grid; place-items: center;
     font-size: 22px; color: #fff;
     background: linear-gradient(150deg, #ffd6ea, #f58cc6);
-    box-shadow: 0 6px 18px rgba(120,10,66,.4), inset 0 1px 0 rgba(255,255,255,.6);
+    box-shadow: 0 6px 18px rgba(90,30,180,.45), inset 0 1px 0 rgba(255,255,255,.6);
   }
-  .cfm-title { font-size: 16.5px; font-weight: 800; color: #fff; letter-spacing: .3px; }
+  .cfm-title { font-family: "Yuanti SC", "YouYuan", "幼圆", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 16.5px; font-weight: 800; color: #fff; letter-spacing: .3px; }
   .cfm-sub { font-size: 12.5px; color: #ffd9ec; margin-top: 6px; line-height: 1.55; }
   .cfm-actions { display: flex; gap: 10px; margin-top: 20px; }
   .cfm-actions .btn { flex: 1 1 0; justify-content: center; padding: 9px 0; }
@@ -620,14 +619,14 @@
   .overlay {
     position: fixed; inset: 0; z-index: 9800;
     display: grid; place-items: center;
-    background: rgba(58,0,30,.72);
+    background: rgba(12,4,38,.78);
     backdrop-filter: blur(7px);
     opacity: 0; pointer-events: none; transition: opacity .35s;
   }
   .overlay.show { opacity: 1; pointer-events: auto; }
   .panel {
     width: min(400px, 90vw);
-    background: linear-gradient(170deg, #ae3474, #6d1a47);
+    background: linear-gradient(170deg, #6d3fd4, #3d2396);
     border: 1px solid rgba(255,255,255,.2);
     border-radius: 20px; padding: 30px 28px 24px;
     text-align: center;
@@ -638,7 +637,7 @@
   }
   .overlay.show .panel { transform: scale(1) translateY(0); }
   /* 死局：面板换成柔和的紫，头像降一点饱和，语气软下来 */
-  .overlay.lose .panel { background: linear-gradient(170deg, #8a63c8, #4a2f7a); }
+  .overlay.lose .panel { background: linear-gradient(170deg, #5a63c8, #32346e); }
   .overlay.lose .win-avatar {
     background: linear-gradient(140deg, #e6dcff, #b9a6e8, #8fa8e8);
     box-shadow: 0 10px 28px rgba(96,80,180,.45), 0 0 0 6px rgba(255,255,255,.13);
@@ -650,8 +649,8 @@
   .win-avatar {
     width: 112px; height: 112px; margin: 0 auto 14px; padding: 3px;
     border-radius: 50%;
-    background: linear-gradient(140deg, #ffe3f1, #f58cc6, #c9a8ff);
-    box-shadow: 0 10px 28px rgba(190,60,140,.45), 0 0 0 6px rgba(255,255,255,.14);
+    background: linear-gradient(140deg, #ffe9f6, #ff9ad5, #8ee6ff);
+    box-shadow: 0 10px 28px rgba(233,80,180,.5), 0 0 0 6px rgba(255,255,255,.16);
     animation: avatarPop .62s cubic-bezier(.34,1.5,.64,1) both;
   }
   .win-avatar img {
@@ -662,7 +661,7 @@
     0%   { transform: scale(.45) rotate(-14deg); opacity: 0; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .panel h2 { margin: 0 0 6px; font-size: 25px; letter-spacing: .5px; }
+  .panel h2 { margin: 0 0 6px; font-size: 25px; letter-spacing: .5px; font-family: "Yuanti SC", "YouYuan", "幼圆", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
   .panel .sub { color: #f3bdd9; font-size: 13px; margin-bottom: 20px; }
   .panel .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 22px; }
   .panel .cell { background: rgba(0,0,0,.24); border-radius: 12px; padding: 11px 6px; }
@@ -802,8 +801,8 @@ var SUITS = ["\u2660", "\u2665", "\u2666", "\u2663"];        // 0黑桃 1红桃 
 var SUIT_KEY = ["s", "h", "d", "c"];                        // 对应 CSS 里 .su-x 的矢量花色
 var IS_RED = [false, true, true, false];
 // 四花色配色，卡面 / 宫廷牌 / 拖拽层 / 收集区共用这一份
-var SUIT_COLOR = ["#4c1d95", "#ff3d7f", "#f59e0b", "#0f766e"];   // ♠ ♥ ♦ ♣
-var SUIT_COLOR_D = ["#331266", "#c41a56", "#b87407", "#0a544e"]; // 对应的深色版（描边/阴影）
+var SUIT_COLOR = ["#5b21b6", "#ff3d7f", "#f59e0b", "#0d9488"];   // ♠ ♥ ♦ ♣
+var SUIT_COLOR_D = ["#3b1583", "#c41a56", "#b87407", "#0b5d55"]; // 对应的深色版（描边/阴影）
 var RANK_TXT = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
 
 var PIP_LAYOUT = {
@@ -909,38 +908,54 @@ function suitIcon(suit, extraCls) {
   return '<i class="su-i su-' + SUIT_KEY[suit] + (extraCls ? " " + extraCls : "") + '"></i>';
 }
 
-// J / Q / K 的宫廷人物（自绘几何风格，红衣=红色花色，蓝衣=黑色花色）
+// J / Q / K 的宫廷人物（二次元 Q 版：大眼睛双高光、齐刘海、猫嘴、腮红、领结）
 function courtSVG(rank, suit) {
   var red = IS_RED[suit];
   // 袍色跟着花色走；1 花色时整副牌都是黑桃，直接用主题粉
   var solo = S.suitCount === 1;
   var cloth = solo ? "#ff5fa8" : SUIT_COLOR[suit];
   var clothD = solo ? "#c41a56" : SUIT_COLOR_D[suit];
-  var gold = "#e2b332", goldD = "#8c6a12";
-  var skin = "#f4dcc2", hair = red ? "#8a5a34" : "#2a1b3d";
+  var gold = "#ffd166", goldD = "#a97a14";
+  var skin = "#ffe8d6", skinD = "#f0c3a0";
+  var hair = solo ? "#e8467c" : (red ? "#8a5a34" : "#3b2a5e");
+  var hairHL = solo ? "#ff7fae" : (red ? "#c08c5a" : "#6b53a0");
+  var eye = "#2b2440";
   // viewBox 比例对齐容器（略扁），人像才能占满宽度而不是缩在中间
   var s = '<svg viewBox="0 0 100 76" xmlns="http://www.w3.org/2000/svg">';
 
-  // 头发（脸后面）—— 人像整体铺满 100 宽，避免缩在中间显得小气
-  s += '<path d="M30 17Q22 32 28 46L38 43Q30 32 33 19Z" fill="' + hair + '"/>';
-  s += '<path d="M70 17Q78 32 72 46L62 43Q70 32 67 19Z" fill="' + hair + '"/>';
+  // 后发（脸后面）—— 人像整体铺满 100 宽，避免缩在中间显得小气
+  s += '<path d="M30 15Q21 32 27 47L38 43Q29 32 33 18Z" fill="' + hair + '"/>';
+  s += '<path d="M70 15Q79 32 73 47L62 43Q71 32 67 18Z" fill="' + hair + '"/>';
+  // 后发高光
+  s += '<path d="M31.5 21Q28 30 31 39" fill="none" stroke="' + hairHL + '" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>';
+  s += '<path d="M68.5 21Q72 30 69 39" fill="none" stroke="' + hairHL + '" stroke-width="1.2" stroke-linecap="round" opacity=".8"/>';
   // 脸
-  s += '<ellipse cx="50" cy="27" rx="16" ry="16.5" fill="' + skin + '" stroke="#c9a184" stroke-width=".9"/>';
-  // 眉眼鼻
-  s += '<ellipse cx="43.4" cy="25" rx="2" ry="1.5" fill="#20242a"/>';
-  s += '<ellipse cx="56.6" cy="25" rx="2" ry="1.5" fill="#20242a"/>';
-  s += '<path d="M39.2 20.4Q43.4 18.6 47.6 20.4" fill="none" stroke="' + hair + '" stroke-width="1.2" stroke-linecap="round"/>';
-  s += '<path d="M52.4 20.4Q56.6 18.6 60.8 20.4" fill="none" stroke="' + hair + '" stroke-width="1.2" stroke-linecap="round"/>';
-  s += '<path d="M50 26L50 31.5" stroke="#c9a184" stroke-width="1" stroke-linecap="round"/>';
-  // 腮红
-  s += '<ellipse cx="37.5" cy="31" rx="3.4" ry="2.2" fill="#f3a8ad" opacity=".55"/>';
-  s += '<ellipse cx="62.5" cy="31" rx="3.4" ry="2.2" fill="#f3a8ad" opacity=".55"/>';
-  // 嘴 / 国王的胡子
+  s += '<ellipse cx="50" cy="27" rx="16" ry="16.5" fill="' + skin + '" stroke="' + skinD + '" stroke-width=".9"/>';
+  // 二次元大眼睛：深色大椭圆 + 主高光 + 副高光
+  s += '<ellipse cx="43" cy="26.4" rx="2.7" ry="3.4" fill="' + eye + '"/>';
+  s += '<circle cx="42" cy="25" r="1" fill="#fff"/>';
+  s += '<circle cx="44.2" cy="28" r=".55" fill="#fff" opacity=".9"/>';
+  s += '<ellipse cx="57" cy="26.4" rx="2.7" ry="3.4" fill="' + eye + '"/>';
+  s += '<circle cx="56" cy="25" r="1" fill="#fff"/>';
+  s += '<circle cx="58.2" cy="28" r=".55" fill="#fff" opacity=".9"/>';
+  // 齐刘海（M 形发际线，发梢垂到眉上）
+  s += '<path d="M34.5 24Q33 12 43 9.5Q47 12.5 50 12Q53 12.5 57 9.5Q67 12 65.5 24L60 19L55.5 22.5L50 18.5L44.5 22.5L40 19Z" fill="' + hair + '"/>';
+  // 刘海高光弧
+  s += '<path d="M40 12.5Q46 10.5 50 11.2" fill="none" stroke="' + hairHL + '" stroke-width="1.4" stroke-linecap="round" opacity=".85"/>';
+  // 腮红（二次元标配，更明显）
+  s += '<ellipse cx="37" cy="31.8" rx="3.6" ry="2.3" fill="#ff9bb0" opacity=".68"/>';
+  s += '<ellipse cx="63" cy="31.8" rx="3.6" ry="2.3" fill="#ff9bb0" opacity=".68"/>';
+  // 嘴：K 国王留胡子，J / Q 是猫嘴（ω）
   if (rank === 13) {
     s += '<path d="M41 35.5Q50 42.5 59 35.5Q54.5 40.5 50 40.5Q45.5 40.5 41 35.5Z" fill="' + hair + '"/>';
-    s += '<path d="M46 33.5Q50 35.5 54 33.5" fill="none" stroke="#8a4a52" stroke-width="1.3" stroke-linecap="round"/>';
+    s += '<path d="M46 33.5Q50 35.5 54 33.5" fill="none" stroke="#c2556b" stroke-width="1.3" stroke-linecap="round"/>';
   } else {
-    s += '<path d="M44.5 34Q50 38.5 55.5 34" fill="none" stroke="#b5636b" stroke-width="1.7" stroke-linecap="round"/>';
+    s += '<path d="M45.5 33.6Q47.8 35.9 50 33.9Q52.2 35.9 54.5 33.6" fill="none" stroke="#c2556b" stroke-width="1.5" stroke-linecap="round"/>';
+  }
+  // K 的披风（画在身体后面，从两肩垂下）
+  if (rank === 13) {
+    s += '<path d="M19 45L8 76L30 71Z" fill="' + clothD + '"/>';
+    s += '<path d="M81 45L92 76L70 71Z" fill="' + clothD + '"/>';
   }
   // 身体：斜肩 + V 领 + 外扩衣摆
   s += '<path d="M14 76L22 48Q27 42 38 41L50 52L62 41Q73 42 78 48L86 76Z" fill="' + cloth + '" stroke="' + clothD + '" stroke-width="1.1" stroke-linejoin="round"/>';
@@ -948,17 +963,23 @@ function courtSVG(rank, suit) {
   s += '<path d="M38 41L50 52L62 41" fill="none" stroke="' + gold + '" stroke-width="2.2" stroke-linejoin="round"/>';
   // 腰带
   s += '<rect x="24" y="60" width="52" height="3.4" rx="1.6" fill="' + gold + '" opacity=".85"/>';
-  // 胸前宝石
-  s += '<path d="M50 55L56 62L50 69L44 62Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width=".8"/>';
-  s += '<path d="M50 59L53 62L50 65L47 62Z" fill="' + clothD + '"/>';
+  // 胸前装饰：K 是宝石，Q / J 是二次元领结
+  if (rank === 13) {
+    s += '<path d="M50 55L56 62L50 69L44 62Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width=".8"/>';
+    s += '<path d="M50 59L53 62L50 65L47 62Z" fill="' + clothD + '"/>';
+  } else {
+    s += '<path d="M50 49L41.5 44.5L43 53.5Z" fill="#ff4d7d" stroke="#b82652" stroke-width=".8" stroke-linejoin="round"/>';
+    s += '<path d="M50 49L58.5 44.5L57 53.5Z" fill="#ff4d7d" stroke="#b82652" stroke-width=".8" stroke-linejoin="round"/>';
+    s += '<circle cx="50" cy="49" r="2.3" fill="#ff6f95" stroke="#b82652" stroke-width=".8"/>';
+  }
   // 权杖
   s += '<rect x="10" y="48" width="3.2" height="28" rx="1.5" fill="' + goldD + '"/>';
   s += '<circle cx="11.6" cy="45" r="4.6" fill="' + gold + '" stroke="' + goldD + '" stroke-width=".9"/>';
 
-  // 头饰：K 大皇冠 / Q 小皇冠 / J 羽帽
+  // 头饰：K 大皇冠 / Q 小皇冠 + 星星发夹 / J 羽帽
   if (rank === 13) {
     s += '<path d="M31 21L35 5L43.5 13L50 1L56.5 13L65 5L69 21Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width="1.1" stroke-linejoin="round"/>';
-    s += '<circle cx="50" cy="8" r="2.6" fill="#c0202a"/>';
+    s += '<circle cx="50" cy="8" r="2.6" fill="#ff4d7d"/>';
     s += '<circle cx="36" cy="11" r="1.9" fill="' + cloth + '"/>';
     s += '<circle cx="64" cy="11" r="1.9" fill="' + cloth + '"/>';
     s += '<rect x="32" y="19" width="36" height="3.2" rx="1.4" fill="' + goldD + '"/>';
@@ -966,6 +987,8 @@ function courtSVG(rank, suit) {
     s += '<path d="M33 22L37 8L50 16L63 8L67 22Z" fill="' + gold + '" stroke="' + goldD + '" stroke-width="1.1" stroke-linejoin="round"/>';
     s += '<circle cx="50" cy="12.5" r="2.3" fill="' + cloth + '"/>';
     s += '<rect x="32.5" y="20" width="35" height="2.8" rx="1.2" fill="' + goldD + '"/>';
+    // 星星发夹
+    s += '<path d="M35 11.5L35.9 13.6L38 14.5L35.9 15.4L35 17.5L34.1 15.4L32 14.5L34.1 13.6Z" fill="#fff" opacity=".95"/>';
   } else {
     s += '<path d="M32 22Q32 6 50 6Q68 6 68 22Z" fill="' + cloth + '" stroke="' + clothD + '" stroke-width="1.1"/>';
     s += '<rect x="28" y="20" width="44" height="4" rx="1.8" fill="' + clothD + '"/>';
@@ -2149,7 +2172,7 @@ function spawnPetals() {
 
 /* ==================== 通关彩带 ==================== */
 function burstConfetti() {
-  var colors = ["#ff8fc2", "#f7c948", "#c9a8ff", "#ffffff", "#ff5fa8", "#ffd6ea"];
+  var colors = ["#ff8fc2", "#f7c948", "#c9a8ff", "#ffffff", "#ff5fa8", "#7ee8ff", "#ffd6ea"];
   var host = document.getElementById("petals") || document.body;
   for (var i = 0; i < 38; i++) {
     var c = document.createElement("i");
